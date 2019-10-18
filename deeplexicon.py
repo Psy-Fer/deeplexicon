@@ -47,12 +47,16 @@ from keras.models import load_model
     Garvan Institute
     Copyright 2019
 
-    Tansel Ersevas ....
+    Tansel Ersevas (t.ersevas@garvan.org.au)
 
     script description
 
+
+
     ----------------------------------------------------------------------------
-    version 0.0 - initial
+    version 0.0.0 - initial
+    version 0.8.0 - CPU version Done
+    version 0.9.0 - Fixed segment offset
 
     So a cutoff of: 0.4958776 for high accuracy
     and another of 0.2943664 for high recovery
@@ -63,7 +67,7 @@ from keras.models import load_model
     ----------------------------------------------------------------------------
     MIT License
 
-    Copyright (c) 2019 -------NAME----------
+    Copyright (c) 2019 James M. Ferguson
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal

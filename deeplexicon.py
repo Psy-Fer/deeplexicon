@@ -62,7 +62,9 @@ from keras.models import load_model
     and another of 0.2943664 for high recovery
 
     TODO:
-        -
+        - Remove leftover libraries
+        - remove debug plots
+
 
     ----------------------------------------------------------------------------
     MIT License
@@ -207,7 +209,6 @@ def main():
 
     # read model
 
-    #TODO Check model errors
     model = read_model(config[deeplexicon][trained_model]) if args.config else read_model(args.model)
     labels = []
     images = []
@@ -224,30 +225,18 @@ def main():
                     # The signal extraction and segmentation can happen in the first step
                     # read fast5 files
                     readID, seg_signal = get_single_fast5_signal(fast5_file, window)
-                    # segment
-                    # array[name, signal.....]
-                    # seg_signal = dRNA_segmenter(signal)
                     if not seg_signal:
                         print_err("Segment not found for:\t{}\t{}".format(fast5_file, readID))
                         continue
                     # convert
                     sig = np.array(seg_signal, dtype=float)
-                    # print(sig)
                     img = convert_to_image(sig)
-                    # print(img)
-                    labels.append(readID) # read ID?
-                    # print_verbose(labels)
+                    labels.append(readID)
                     fast5s[readID] = fast5
-                    # print_verbose(readID)
-                    # print_verbose(fast5)
-                    # print_verbose(fast5s)
                     images.append(img)
-                    # sys.exit()
                     # classify
                     if len(labels) >= args.batch_size:
                         C = classify(model, labels, np.array(images), False, args.threshold)
-                        # out = classify(model, readID, np.array([img]), False, 0.0)
-                        # print_verbose(C)
                         # save to output
                         for readID, out, c, P in C:
                             prob = [round(float(i), 6) for i in P]
@@ -274,10 +263,6 @@ def main():
                     # The signal extraction and segmentation can happen in the first step
                     # read fast5 files
                     seg_signal = get_multi_fast5_signal(fast5_file, window)
-                    # segment
-                    # array[name, signal.....]
-                    # seg_signal = dRNA_segmenter(signal)
-                    # print_verbose(list(seg_signal.keys()))
                     sig_count = 0
                     for readID in seg_signal:
                         # convert
@@ -288,8 +273,6 @@ def main():
                         sig_count += 1
                         if len(labels) >= args.batch_size:
                             C = classify(model, labels, np.array(images), False, args.threshold)
-                            # out = classify(model, readID, np.array([img]), False, 0.0)
-                            # print_verbose(C)
                             # save to output
                             for readID, out, c, P in C:
                                 prob = [round(float(i), 6) for i in P]
@@ -315,8 +298,6 @@ def main():
                             blah = 0
     #finish up
     C = classify(model, labels, np.array(images), False, args.threshold)
-    # out = classify(model, readID, np.array([img]), False, 0.0)
-    # print_verbose(C)
     # save to output
     for readID, out, c, P in C:
         prob = [round(float(i), 6) for i in P]
@@ -336,11 +317,6 @@ def main():
     labels = []
     images = []
     fast5s = {}
-
-
-
-
-
 
 
     # final report/stats
@@ -377,32 +353,23 @@ def get_multi_fast5_signal(read_filename, w):
     '''
     pA_signals = {}
     f5_dic = read_multi_fast5(read_filename)
-    # print_verbose(list(f5_dic.keys()))
     seg = 0
     sig_count = 0
     for read in f5_dic:
         sig_count += 1
         print_verbose("reading sig_count: {}/{}".format(sig_count, len(f5_dic)))
         # get readID and signal
-        # print_verbose("read: {}".format(read))
+
         readID = f5_dic[read]['readID']
-        # print_verbose("readID: {}".format(readID))
         signal = f5_dic[read]['signal']
-        # print_verbose("sig: {}".format(signal[:5]))
-        # continue
-
-
 
         # segment on raw
         seg = dRNA_segmenter(readID, signal, w)
-        # print_verbose("seg return: {}".format(seg))
         if not seg:
-            # print_verbose("No segment found - skipping: {}".format(readID))
             seg = 0
             continue
         # convert to pA
         pA_signal = convert_to_pA(f5_dic[read])
-        # print_verbose("pA: {}".format(pA_signal[:5]))
         pA_signals[readID] = pA_signal[seg[0]:seg[1]]
     # return signal/signals
     return pA_signals
@@ -451,9 +418,6 @@ def read_multi_fast5(filename):
     # c = 0
     with h5py.File(filename, 'r') as hdf:
         for read in list(hdf.keys()):
-            # c += 1
-            # if c > 100:
-            #     break
             f5_dic[read] = {'signal': [], 'readID': '', 'digitisation': 0.0,
                             'offset': 0.0, 'range': 0.0, 'sampling_rate': 0.0}
             try:
@@ -547,15 +511,14 @@ def dRNA_segmenter(readID, signal, w):
 
     x, y = 0, 0
 
-    # print_verbose("segs befor filter: {}".format(segs))
     for a, b in segs:
         if b - a > hi_thresh:
             continue
         if b - a < lo_thresh:
             continue
         x, y = a, b
-        # print "{}\t{}\t{}\t{}".format(f5, read_dic[f5], x, y)
-        # print_verbose("xy before return: [{},{}]".format(x, y))
+
+        # to be modified in next major re-training
         return [x+offset-buff, y+offset+buff]
         break
     print_verbose("dRNA_segmenter: no seg found: {}".format(readID))
@@ -580,15 +543,11 @@ def convert_to_pA(d):
         new_raw.append("{0:.2f}".format(round(j,2)))
     return new_raw
 
-# Python timeseries interface
-
 
 def pyts_transform(transform, data, image_size, show=False, cmap='rainbow', img_index=0):
     try:
         t_start=time.time()
         X_transform = transform.fit_transform(data)
-        # if args.verbose:
-        #     print_verbose("{} {}".format(time.time() - t_start, 'seconds'))
         if (show):
             plt.figure(figsize=(4, 4))
             plt.grid(b=None)
@@ -646,10 +605,6 @@ def confidence_margin(npa):
     sorted = np.sort(npa)[::-1]    #return sort in reverse, i.e. descending
     # sorted = np.sort(npa)   #return sort in reverse, i.e. descending
     d = sorted[0] - sorted[1]
-    # if args.verbose:
-    #     print_verbose("Sorted: {}".format(sorted))
-    #     print_verbose("conf interval: {}".format(d))
-    # return(sorted[0][0] - sorted[0][1])
     return(d)
 
 def classify(model, labels, image, subtract_pixel_mean, threshold):
@@ -661,18 +616,12 @@ def classify(model, labels, image, subtract_pixel_mean, threshold):
         x_mean = np.mean(x, axis=0)
         x -= x_mean
     x=[x]
-    # print(x)
     y = model.predict(x, verbose=0)
-    # print(y)
     res = []
     for i in range(len(y)):
         cm = confidence_margin(y[i])
-        #print_verbose(y[i][np.argmax(y[i])])
         if y[i][np.argmax(y[i])] >= threshold:
-            # return(np.argmax(y))
             res.append([labels[i], np.argmax(y[i]), cm, y[i]])
-        # return(None)
-        # return(np.argmax(y))
         else:
             res.append([labels[i], None, cm, y[i]])
     return res

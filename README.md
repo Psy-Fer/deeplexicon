@@ -23,9 +23,14 @@ Signal based nanopore RNA demultiplexing with convolutional neural networks
 
     git clone https://github.com/Psy-Fer/deeplexicon.git
 
-#### source and install requirements
+#### source and install requirements CPU
     source Deeplexicon/bin/activate
     pip3 install Keras Tensorflow Pandas PyTs Scikit-learn numba==0.45.0
+
+#### Source and install requirements GPU
+
+    source Deeplexicon/bin/activate
+    pip3 install Keras tensorflow-gpu Pandas PyTs Scikit-learn numba==0.45.0
 
 ## Run
 

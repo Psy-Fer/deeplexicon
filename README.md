@@ -3,19 +3,19 @@
 Signal-based demultiplexing of direct RNA sequencing reads using convolutional neural networks
 
 ### About DeePlexiCon
-DeePlexiCon is a tool to demultiplex barcoded direct RNA sequencing reads from Oxford Nanopore Technologies. 
+DeePlexiCon is a tool to demultiplex barcoded direct RNA sequencing reads from Oxford Nanopore Technologies.
 Please note that the software has been tested and validated with a set of 4 20bp barcodes listed below:                                     
 
 - Barcode 1: GGCTTCTTCTTGCTCTTAGG
-- Barcode 2: GTGATTCTCGTCTTTCTGCG 
+- Barcode 2: GTGATTCTCGTCTTTCTGCG
 - Barcode 3: GTACTTTTCTCTTTGCGCGG
-- Barcode 4: GGTCTTCGCTCGGTCTTATT 
+- Barcode 4: GGTCTTCGCTCGGTCTTATT
 
-Please see below further instructions about how to build barcoded direct RNA libraries. 
+Please see below further instructions about how to build barcoded direct RNA libraries.
 
 ## What's included
 - Script to demultiplex direct RNA fast5 reads, barcoded using the strategy described above
-- Example fast5 data built using the 4 custom barcoded adaptors 
+- Example fast5 data built using the 4 custom barcoded adaptors
 
 ## Installation
 
@@ -52,20 +52,20 @@ Please see below further instructions about how to build barcoded direct RNA lib
     python3 cmd_line_deeplexicon_caller.py -p ~/top/fast5/path/ -t multi -m /model/path/pAmps-final-actrun_newdata_nanopore_UResNet20v2_model.030.h5 > output.tsv
 
 
-Please note, the current algorithm has been trained to demultiplex the 4 barcodes shown above. It will not accurately demultiplex reads if different sequences are used. 
+Please note, the current algorithm has been trained to demultiplex the 4 barcodes shown above. It will not accurately demultiplex reads if different sequences are used.
 
 ## How to build barcoded direct RNA sequencing libraries:
 
-To build the barcoded libraries, the oligo DNA sequences listed below should be used instead of those coming with the direct RNA sequencing kit (RTA). The barcode is embedded in the oligoA sequence, which will be ligated to the RNA molecule during the library preparation. 
- 
+To build the barcoded libraries, the oligo DNA sequences listed below should be used instead of those coming with the direct RNA sequencing kit (RTA). The barcode is embedded in the oligoA sequence, which will be ligated to the RNA molecule during the library preparation.
+
 These oligos are designed to barcode libraries which have been enriched with oligodT beads (i.e. RNA should have polyA tail to anneal to oligoB). Each oligoA matches an oligoB.
 
 OligoA :
 
 - OligoA_shuffle1: 5'-/5Phos/GGCTTCTTCTTGCTCTTAGGTAGTAGGTTC-3' (same as in ONT RTA):
-- OligoA_shuffle2: 5'-/5Phos/GTGATTCTCGTCTTTCTGCGTAGTAGGTTC-3' 
-- OligoA_shuffle3: 5'-/5Phos/GTACTTTTCTCTTTGCGCGGTAGTAGGTTC-3' 
-- OligoA_shuffle4: 5'-/5Phos/GGTCTTCGCTCGGTCTTATTTAGTAGGTTC-3' 
+- OligoA_shuffle2: 5'-/5Phos/GTGATTCTCGTCTTTCTGCGTAGTAGGTTC-3'
+- OligoA_shuffle3: 5'-/5Phos/GTACTTTTCTCTTTGCGCGGTAGTAGGTTC-3'
+- OligoA_shuffle4: 5'-/5Phos/GGTCTTCGCTCGGTCTTATTTAGTAGGTTC-3'
 
 OligoB:
 
@@ -75,7 +75,7 @@ OligoB:
 - OligoB_shuffle4: 5’-GAGGCGAGCGGTCAATTTTAATAAGACCGAGCGAAGACCTTTTTTTTTT-3’
 
 
-## Additional information: 
+## Additional information:
 
 Full library versions used:
 
@@ -116,4 +116,4 @@ Full library versions used:
 ## Citing this work:
 If you find this work useful, please cite:
 
-Martin A. Smith, Tansel Ersavas, James Ferguson, Huanle Liu, Morghan C. Lucas, Oguzhan Begik, Lilly Bojarski, Kirston Barton and Eva Maria Novoa. Barcoding and demultiplexing Oxford Nanopore direct RNA sequencing reads with deep residual learning. bioRxiv 2019
+Martin A. Smith, Tansel Ersavas, James M. Ferguson, Huanle Liu, Morghan C. Lucas, Oguzhan Begik, Lilly Bojarski, Kirston Barton and Eva Maria Novoa. Barcoding and demultiplexing Oxford Nanopore direct RNA sequencing reads with deep residual learning. bioRxiv 2019

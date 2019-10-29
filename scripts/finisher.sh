@@ -3,8 +3,11 @@
 #$ -N FINISH
 #$ -S /bin/bash
 #$ -b y
+#$ -j y 
+#$ -o logs/FINISHER.log
 
-FASTQDIR=./fastq/${1##*/}_guppy-3.2.4
+INPUT=${1%*/}
+FASTQDIR=./fastq/${INPUT##*/}_guppy-3.2.4
 
 find ${FASTQDIR} -name "*fastq" -exec cat {} \; > ${FASTQDIR}.fastq
 

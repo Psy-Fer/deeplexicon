@@ -1,6 +1,4 @@
-![alt text](https://github.com/Psy-Fer/deeplexicon/edit/master/img/logo.png "DeePlexiCon")
-
-# DeePlexiCon
+![alt text](./img/logo.png "DeePlexiCon")
 
 Signal-based demultiplexing of direct RNA sequencing reads using convolutional neural networks
 

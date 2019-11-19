@@ -1,0 +1,33 @@
+#!/bin/bash
+#$ -cwd
+#$ -N GPU_GUP
+#$ -S /bin/bash
+#$ -b y
+#$ -j y
+#$ -l mem_requested=20G
+#$ -l h_vmem=20G
+#$ -l tmp_requested=5G
+#$ -l nvgpu=1
+#$ -pe smp 4
+#$ -o logs/basecalling_\${1##*/}
+
+# Models files found here:
+# /share/ClusterShare/software/contrib/shacar/ont-guppy-3.2.4/data
+
+OUT_DIR=./fastq/${1##*/}_guppy-3.2.4
+echo $OUT_DIR
+
+if [ -z $OUT_DIR ]; then echo "Edit -t parameter, OUT_DIR required"; exit 1; fi
+
+READS=$(find ${1} -type f -name "*.fast5" | sed -n ${SGE_TASK_ID}p)
+OUTPUT=${OUT_DIR}/${SGE_TASK_ID}
+
+if [ ! -d ${OUTPUT} ]; then mkdir -p ${OUTPUT}; fi
+
+ mkdir -p ${TMPDIR}/fast5/${SGE_TASK_ID}
+ cp ${READS} ${TMPDIR}/fast5/${SGE_TASK_ID}
+
+module load shacar/ont-guppy/3.2.4
+
+guppy_basecaller --chunks_per_runner 1500 --gpu_runners_per_device 1 --cpu_threads_per_caller 4 -x "cuda:0 cuda:1 cuda:2 cuda:3" -r -i ${TMPDIR}/fast5/${SGE_TASK_ID} -c rna_r9.4.1_70bps_hac_prom.cfg -s ${OUTPUT}
+#guppy_basecaller --chunks_per_runner 1500 --gpu_runners_per_device 1 --cpu_threads_per_caller 4 -x "cuda:0 cuda:1 cuda:2 cuda:3" -r -i ${TMPDIR}/fast5/${SGE_TASK_ID} -c rna_r9.4.1_70bps_hac.cfg -s ${OUTPUT}

@@ -1,4 +1,4 @@
-![alt text](https://github.com/Psy-Fer/deeplexicon/edit/master/img/logo.png "DeePlexiCon")
+![alt text](./img/logo.png "DeePlexiCon")
 
 # DeePlexiCon
 

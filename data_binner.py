@@ -84,7 +84,8 @@ def main():
         with open(bin, 'rt') as f:
             for l in f:
                 l = l.strip('\n')
-                bin_dic[bin].add(l)
+                l = l.split('\t')
+                bin_dic[bin].add(l[0])
 
     # split signals no header
     squig_dic = {}

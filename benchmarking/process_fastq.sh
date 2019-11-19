@@ -26,6 +26,38 @@
 # Extract data from server
 # pwd : /share/ScratchGeneral/marsmi/deeplexicon/
 
+if [[ $# == 0 ]]; then
+	echo -e "\nUSAGE: ./process_fastq.sh deeplexicon_output.csv [ reads.fastq ] [ reference.fasta ]"
+
+if [[ -n "$1" && -e $1 ]]; then
+	DMUX=$1
+	echo "Demux output found: ${1}"
+else
+	echo "Demux output ${1} not supplied/found. Exiting."
+	exit 1
+fi
+
+if [[ -n "$2" && -e $2 ]]; then
+	FASTQ=$2
+	echo "Input fastq file set to ${2}"
+else
+	echo "Input fastq ${2} not supplied/found. WARNING: Will bypass sanity checks."
+fi
+
+if [[ -n "$3" && -e $3 ]]; then
+	REFA=$3
+	echo "Reference fasta file set to ${3}"
+else
+	if [[ ! -e ./refs/barcoded_seqs_ENO2.fa ]]; then 
+		echo "Default reference fasta not found in ./refs/barcoded_seqs_ENO2.fa."
+		echo "Consider executing from deeplexicon repository root."
+		echo "WARNING: Will bypass sanity checks."
+	else
+		echo "Input fasta ${3} not supplied. Using ./refs/barcoded_seqs_ENO2.fa as default"
+	fi
+fi
+
+
 #Align to reference
 qsub -cwd -N mm2_18 -pe smp 12 -l mem_requested=4G,h_vmem=4G -V -S /bin/bash -b y ./scripts/minimap2.sh ./refs/barcoded_seqs_ENO2.fa ./fastq/rep3.fastq
 

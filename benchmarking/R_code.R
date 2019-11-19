@@ -20,6 +20,7 @@ Jstat <- function( Metrics ){
  	print(paste(index, Metrics$Cutoff[index], Metrics$SENS[index], Metrics$SPEC[index]))
 }
 
+#get cutoff and stats at max accuracy
 Maxcuracy <- function( Metrics ){
 	index <- 1 ; max <- -100 
 	for ( i in c(1:length(Metrics$ACC))) {   
@@ -30,6 +31,7 @@ Maxcuracy <- function( Metrics ){
  	print(paste(index, Metrics$Cutoff[index], Metrics$SENS[index], Metrics$SPEC[index]))
 }
 
+#get stats at a given cutoff
 CutoffStats <- function( Metrics, Thresh ){ 
 	for ( i in c(1:length(Metrics$Cutoff))) {
 		if ( Metrics$Cutoff[i] < Thresh ) {
@@ -42,7 +44,18 @@ CutoffStats <- function( Metrics, Thresh ){
 }
 
 ##################################
-#import testing data
+# import testing data
+# N.B. Default deeplexicon output should be parsed to split predictions to one per line
+# This needs some R love, which I cannot provide as a master of BASH-FU. 
+# I run this in bash a priori on DeePlexiCon output: 
+#
+# for DMUX in *csv ; do 
+#   awk	'BEGIN{FS=","OFS="\t"}
+#    { if (NR>1)for (i=2;i<=NF;i++) {print $1"_BC"(i-1),$i}}' $DMUX > ${DMUX%*.csv}_split.tsv 
+# done
+#
+###################################
+
 t <- read.delim("test_predictions_split.tsv",header=F)
 ta <- read.delim("test_actuals_split.tsv",header=F)
 

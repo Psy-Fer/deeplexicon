@@ -1,7 +1,5 @@
 ![alt text](./img/logo.png "DeePlexiCon")
 
-# DeePlexiCon
-
 Signal-based demultiplexing of direct RNA sequencing reads using convolutional neural networks
 
 ### About DeePlexiCon

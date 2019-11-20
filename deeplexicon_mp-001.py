@@ -147,70 +147,6 @@ def get_filenames(path):
                 yield [fast5, fast5_file]
 
 
-
-#
-# class mp_class(object):
-#     def __init__(self, args, m, bc):
-#         """
-#         Initiates a queue, a pool and a temporary buffer, used only
-#         when the queue is full.
-#         """
-#         self.MAX_WORKERS = args.threads
-#         self.args = args
-#         self.model = m
-#         self.barcodes = bc
-#         print_verbose("MP: {} CPUs set up".format(self.MAX_WORKERS))
-#         self.q = Queue()
-#         self.pool = Pool(processes=self.MAX_WORKERS, initializer=self.worker_main,)
-#         self.temp_buffer = []
-#
-#     def close_join(self):
-#         """
-#         close/join pool
-#         """
-#         pass
-#         # for i in range(self.MAX_WORKERS):
-#         #     self.add_to_queue(-1)
-#         # self.pool.close()
-#         # self.pool.join()
-#
-#     def add_to_queue(self, msg):
-#         """
-#         If queue is full, put the message in a temporary buffer.
-#         If the queue is not full, adding the message to the queue.
-#         If the buffer is not empty and that the message queue is not full,
-#         putting back messages from the buffer to the queue.
-#         """
-#         if self.q.full():
-#             self.temp_buffer.append(msg)
-#         else:
-#             self.q.put(msg)
-#             if len(self.temp_buffer) > 0:
-#                 add_to_queue(self.temp_buffer.pop())
-#
-#     def write_to_queue(self, file_gen):
-#         """
-#         This function writes some messages to the queue.
-#         """
-#         for f in file_gen:
-#             # print_verbose("Added {}".format(f[0]))
-#             self.add_to_queue(f)
-#         # print_verbose("Added all readIDs, adding poison")
-#
-#     def worker_main(self):
-#         """
-#         Waits indefinitely for an item to be written in the queue.
-#         Finishes when the parent process terminates.
-#         """
-#         print_verbose("Process {0} started".format(getpid()))
-#         # If queue is not empty, pop the next element and do the work.
-#         # If queue is empty, wait indefinitly until an element get in the queue.
-#         file = self.q.get(block=True, timeout=None)
-#         print_verbose("{0} retrieved: {1}".format(getpid(), file))
-#         core_work(self.args, file, self.model, self.barcodes)
-#         return
-
-
 model = None
 
 def init_worker(arg_mod, d):
@@ -222,16 +158,6 @@ def init_worker(arg_mod, d):
     model = read_model(arg_mod)
     import tensorflow as tf
     core_work.data = d
-
-
-
-
-# def process_input_by_worker_process(q):
-#     """ The work to be done by one worker for one input.
-#     Performs input transformation then runs inference with the ML model local to the worker process. """
-#     # input transformation (read from file, resize, swap axis, etc.) this happens on CPU
-#     core_work(q)
-
 
 
 def run_inference_in_process_pool():
@@ -251,8 +177,8 @@ def run_inference_in_process_pool():
     # Feed inputs process pool to do transform and inference
     left = len(data) % args.batch_size
     print_verbose("total: {} leftover: {}".format(len(data), left))
-    # pool_output = process_pool.map(core_work, range(100))
-    pool_output = process_pool.map(core_work, range(len(data)))
+    pool_output = process_pool.map(core_work, range(100))
+    # pool_output = process_pool.map(core_work, range(len(data)))
     # pool_output = process_pool.map(core_work, range(0, len(data) - left,  args.batch_size))
     # if left > 0:
     # build another pool

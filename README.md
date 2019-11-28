@@ -26,6 +26,12 @@ Please see below further instructions about how to build barcoded direct RNA lib
     sudo apt-get update
     sudo apt-get install python3.6 python3.6-venv
 
+#### TMP option: add python3.7
+    sudo apt install python3.7 python3.7-dev python3.7-venv
+    python3.7 -m venv ./DPC
+    source ./DPC/bin/activate
+    pip install Keras==2.2.4 Pandas PyTs Scikit-learn numba==0.45.0 TensorFlow==1.13.1
+
 
 ### Linux with python3.6
 ##### (other python3 versions not yet tested)

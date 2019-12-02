@@ -66,8 +66,6 @@ from time import sleep
 
     TODO:
         - Remove leftover libraries
-        - remove debug plots
-        - Remove redundant code
         - create log files with information
         - take in fastq for dmux splitting
         - take in paf or bam for training splitting
@@ -96,16 +94,6 @@ from time import sleep
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 '''
-
-
-
-squiggle_max = 1199
-squiggle_min = 1
-input_cut = 72000 #potenitall need to be configurable
-image_size = 224
-num_classes = 4
-window = 2000
-sentinel = -1
 
 
 class MyParser(argparse.ArgumentParser):
@@ -147,8 +135,6 @@ def get_filenames(path):
                 yield [fast5, fast5_file]
 
 
-model = None
-
 def init_worker(arg_mod, d):
     """ This gets called when the worker process is created
     Here we initialize the worker process by loading the ML model into GPU memory.
@@ -184,8 +170,6 @@ def run_inference_in_process_pool():
     # build another pool
     # pool_output_2 = process_pool.map(core_work, range(len(data), len(left)))
     print_verbose("pass jobs {}, fail jobs {}".format(pool_output.count(1), pool_output.count(-1)))
-
-
 
 def core_work(i):
     '''
@@ -228,6 +212,14 @@ def core_work(i):
 
 
 VERSION = "0.9.2"
+model = None
+squiggle_max = 1199
+squiggle_min = 1
+input_cut = 72000 #potenitall need to be configurable
+image_size = 224
+num_classes = 4
+window = 2000
+
 
 parser = MyParser(
     description="DeePlexiCon - Demultiplex direct RNA reads")
@@ -270,6 +262,9 @@ if args.verbose:
     print_verbose("DeePlexiCon: {}".format(VERSION))
     print_verbose("arg list: {}".format(args))
 
+if args.config:
+    config = read_config(args.config) #TODO check config read error
+
 
 barcode_out = {0: "bc_1",
                1: "bc_2",
@@ -284,99 +279,10 @@ def main():
     Main function
     '''
 
-
-    # for squiggle and segs, need to use a result return for each proc, and then write serially
-    # or use locks
-    # if args.squiggle:
-    #     squig_file = args.squiggle
-    #     with open(squig_file, 'a') as f:
-    #         f.write("{}\t{}\n".format("ReadID", "signal_pA"))
-    # else:
-    #     squig_file = ''
-    #
-    # if args.segment:
-    #     seg_file = args.segment
-    #     with open(seg_file, 'a') as f:
-    #         f.write("{}\t{}\n".format("ReadID", "start", "stop"))
-    # else:
-    #     seg_file = ''
-
-    # Globals
-    if args.config:
-        config = read_config(args.config) #TODO check config read error
-
-
-    # main logic
-
-    # read model
-    #
-    # model = read_model(config[deeplexicon][trained_model]) if args.config else read_model(args.model)
-    # barcode_out = {0: "bc_1",
-    #                1: "bc_2",
-    #                2: "bc_3",
-    #                3: "bc_4",
-    #                None: "unknown"
-    #                }
-    # labels = []
-    # images = []
-    # fast5s = {}
-    # stats = ""
-    # seg_dic = {}
     print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format("fast5", "ReadID", "Barcode", "Confidence Interval", "P_bc_1", "P_bc_2", "P_bc_3", "P_bc_4"))
-    # for file in input...
-    # use single core to push readIDs to extract data using mp.pool...make this a yeild
 
     run_inference_in_process_pool()
-    # # Testing for single reads, in batches of 10?
-    # file_gen = get_filenames(args.path)
-    # deep_mp = mp_class(args, model, barcode_out)
-    # deep_mp.write_to_queue(file_gen)
-    # deep_mp.close_join()
-    # time(40)
 
-    # q = Queue()
-    # for f in file_gen:
-    #     q.put(f)
-    #
-    # jobs = []
-    # for i in range(args.threads):
-    #     p = Process(target=core_work, args=(args, q, model, barcode_out,))
-    #     jobs.append(p)
-    #     p.start()
-    #
-    # for p in jobs:
-    #     p.join()
-
-    # file_gen = get_filenames(args.path)
-    # for fast5, fast5_file in file_gen:
-    #     # if args.f5_type == "single":
-    #         #everthing below this, send off in batches of N=args.batch_size
-    #         # The signal extraction and segmentation can happen in the first step
-    #         # read fast5 files
-    #         readID, seg_signal = get_single_fast5_signal(fast5_file, window, squig_file, seg_file)
-    #         if not seg_signal:
-    #             print_err("Segment not found for:\t{}\t{}".format(fast5_file, readID))
-    #             continue
-    #         # convert
-    #         sig = np.array(seg_signal, dtype=float)
-    #         img = convert_to_image(sig)
-    #         images.append(img)
-    #         labels.append(readID)
-    #         fast5s[readID] = fast5
-    #         # classify
-    #         # put all the data to queue for processing
-    #         # if len(labels) >= args.batch_size:
-    #         C = classify(model, labels, np.array(images), False, args.threshold)
-    #         # save to output
-    #         for readID, out, c, P in C:
-    #             prob = [round(float(i), 6) for i in P]
-    #             cm = round(float(c), 4)
-    #             if args.verbose:
-    #                 print_verbose("cm is: {}".format(cm))
-    #             print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, prob[0], prob[1], prob[2], prob[3]))
-    #         labels = []
-    #         images = []
-    #         fast5s = {}
     #
     #
     # elif args.f5_type == "multi":

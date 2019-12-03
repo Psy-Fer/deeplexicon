@@ -57,6 +57,7 @@ from keras.models import load_model
     version 0.9.0 - Fixed segment offset
     version 0.9.1 - added segment and squiggle output
     version 0.9.2 - separate segment output and code clean up
+    version 1.0.0 - initial release
 
     So a cutoff of: 0.4958776 for high accuracy
     and another of 0.2943664 for high recovery
@@ -145,7 +146,7 @@ def main():
     '''
     Main function
     '''
-    VERSION = "0.9.2"
+    VERSION = "1.0.0"
 
     parser = MyParser(
         description="DeePlexiCon - Demultiplex direct RNA reads")

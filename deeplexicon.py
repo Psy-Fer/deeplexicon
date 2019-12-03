@@ -152,7 +152,7 @@ def main():
     #group = parser.add_mutually_exclusive_group()
     parser.add_argument("-p", "--path",
                         help="Top path of fast5 files to dmux")
-    parser.add_argument("-t", "--type", default="multi", choices=["multi", "single"],
+    parser.add_argument("-f", "--form", default="multi", choices=["multi", "single"],
                         help="Multi or single fast5s")
     parser.add_argument("-c", "--config",
                         help="config file")
@@ -241,7 +241,7 @@ def main():
         for fast5 in files:
             if fast5.endswith('.fast5'):
                 fast5_file = os.path.join(dirpath, fast5)
-                if args.type == "single":
+                if args.form == "single":
                     #everthing below this, send off in batches of N=args.batch_size
                     # The signal extraction and segmentation can happen in the first step
                     # read fast5 files
@@ -270,7 +270,7 @@ def main():
                         fast5s = {}
 
 
-                elif args.type == "multi":
+                elif args.form == "multi":
                     #everthing below this, send off in batches of N=args.batch_size
                     # The signal extraction and segmentation can happen in the first step
                     # read fast5 files

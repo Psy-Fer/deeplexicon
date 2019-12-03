@@ -11,6 +11,8 @@ Please note that the software has been tested and validated with a set of 4 20bp
 - Barcode 3: GTACTTTTCTCTTTGCGCGG
 - Barcode 4: GGTCTTCGCTCGGTCTTATT
 
+![alt text](./img/Fig.png "DeePlexiCon-Fig")
+
 Please see below further instructions about how to build barcoded direct RNA libraries.
 
 ## What's included

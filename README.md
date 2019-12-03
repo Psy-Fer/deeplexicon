@@ -35,7 +35,7 @@ Please see below further instructions about how to build barcoded direct RNA lib
     pip install Keras==2.2.4 Pandas PyTs Scikit-learn numba==0.45.0 TensorFlow==1.13.1
  -->
 
-### Linux with python3.6
+### Linux with python3.7
 #### Create environtment
 
     python3.7 -m venv ./Deeplexicon/

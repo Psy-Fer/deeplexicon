@@ -22,11 +22,11 @@ Please see below further instructions about how to build barcoded direct RNA lib
 ## Installation
 
 ### For Ubuntu 16.04
-#### add python 3.6 repo (not on default 16.04 ppa repos)
+#### add python 3.7 repo (not on default 16.04 ppa repos)
 
     sudo add-apt-repository ppa:deadsnakes/ppa
     sudo apt-get update
-    sudo apt-get install python3.6 python3.6-venv
+    sudo apt install python3.7 python3.7-dev python3.7-venv
 
 <!-- #### TMP option: add python3.7
     sudo apt install python3.7 python3.7-dev python3.7-venv
@@ -38,7 +38,7 @@ Please see below further instructions about how to build barcoded direct RNA lib
 ### Linux with python3.6
 #### Create environtment
 
-    python3.6 -m venv ./Deeplexicon/
+    python3.7 -m venv ./Deeplexicon/
 
 
 #### clone git repository
@@ -47,7 +47,7 @@ Please see below further instructions about how to build barcoded direct RNA lib
 
 #### source and install requirements CPU
     source Deeplexicon/bin/activate
-    pip3 install Keras Tensorflow Pandas PyTs Scikit-learn numba==0.45.0
+    pip install Keras==2.2.4 Pandas PyTs Scikit-learn numba==0.45.0 TensorFlow==1.13.1
 
 #### Source and install requirements GPU
 
@@ -58,7 +58,7 @@ pip3 install Keras tensorflow-gpu Pandas PyTs Scikit-learn numba==0.45.0 -->
 
 ## Running the software
 
-    python3 deeplexicon.py -p ~/top/fast5/path/ -f multi -m model/pAmps-final-actrun_newdata_nanopore_UResNet20v2_model.030.h5 > output.tsv
+    python3 deeplexicon.py -p ~/top/fast5/path/ -f multi -m models/resnet20-final.h5 > output.tsv
 
 
 Please note, the current algorithm has been trained to demultiplex the 4 barcodes shown above. It will not accurately demultiplex reads if different sequences are used.

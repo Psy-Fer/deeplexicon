@@ -58,7 +58,7 @@ pip3 install Keras tensorflow-gpu Pandas PyTs Scikit-learn numba==0.45.0 -->
 
 ## Running the software
 
-    python3 deeplexicon.py -p ~/top/fast5/path/ -f multi -m model/pAmps-rep2-4-train1_newdata_nanopore_UResNet20v2_model.039.h5 > output.tsv
+    python3 deeplexicon.py -p ~/top/fast5/path/ -f multi -m model/pAmps-final-actrun_newdata_nanopore_UResNet20v2_model.030.h5 > output.tsv
 
 
 Please note, the current algorithm has been trained to demultiplex the 4 barcodes shown above. It will not accurately demultiplex reads if different sequences are used.

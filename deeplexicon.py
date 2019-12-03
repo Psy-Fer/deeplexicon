@@ -264,7 +264,7 @@ def main():
                             cm = round(float(c), 4)
                             if args.verbose:
                                 print_verbose("cm is: {}".format(cm))
-                            print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcde_out[out], cm, prob[0], prob[1], prob[2], prob[3]))
+                            print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, prob[0], prob[1], prob[2], prob[3]))
                         labels = []
                         images = []
                         fast5s = {}
@@ -307,7 +307,7 @@ def main():
         cm = round(float(c), 4)
         if args.verbose:
             print_verbose("cm is: {}".format(cm))
-        print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcde_out[out], cm, prob[0], prob[1], prob[2], prob[3]))
+        print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, prob[0], prob[1], prob[2], prob[3]))
     labels = []
     images = []
     fast5s = {}

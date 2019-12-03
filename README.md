@@ -53,8 +53,8 @@ Please see below further instructions about how to build barcoded direct RNA lib
 
 ##### (Coming soon)
 
-    <!-- source Deeplexicon/bin/activate
-    pip3 install Keras tensorflow-gpu Pandas PyTs Scikit-learn numba==0.45.0 -->
+<!-- source Deeplexicon/bin/activate
+pip3 install Keras tensorflow-gpu Pandas PyTs Scikit-learn numba==0.45.0 -->
 
 ## Running the software
 

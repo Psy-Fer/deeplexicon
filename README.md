@@ -4,7 +4,7 @@ Signal-based demultiplexing of direct RNA sequencing reads using convolutional n
 
 ### About DeePlexiCon
 DeePlexiCon is a tool to demultiplex barcoded direct RNA sequencing reads from Oxford Nanopore Technologies.
-Please note that the software has been tested and validated with a set of 4 20bp barcodes listed below:                                     
+Please note that the software has been tested and validated with a set of 4x20bp barcodes listed below:                                     
 
 - Barcode 1: GGCTTCTTCTTGCTCTTAGG
 - Barcode 2: GTGATTCTCGTCTTTCTGCG
@@ -62,7 +62,7 @@ pip3 install Keras tensorflow-gpu Pandas PyTs Scikit-learn numba==0.45.0 -->
 
 ## Split fastq
 
-    python3 fastq_splitter.py -d output.txt -q combined.fastq -o dmux_folder/ -s sample_name
+    python3 fastq_splitter.py -d output.tsv -q combined.fastq -o dmux_folder/ -s sample_name
 
 
 Please note, the current algorithm has been trained to demultiplex the 4 barcodes shown above. It will not accurately demultiplex reads if different sequences are used.

@@ -343,7 +343,7 @@ def get_single_fast5_signal(read_filename, w, squig_file, seg_file):
             f.write("{}\t{}\n".format(readID, "\t".join(pA_signal)))
     if seg_file:
         with open(seg_file, 'a') as f:
-            f.write("{}\t{}\n".format(readID, seg[0], seg[1]))
+            f.write("{}\t{}\t{}\n".format(readID, seg[0], seg[1]))
     # return signal/signals
     return readID, pA_signal[seg[0]:seg[1]]
 

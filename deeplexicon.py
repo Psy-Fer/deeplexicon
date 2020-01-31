@@ -203,7 +203,7 @@ def main():
     if args.segment:
         seg_file = args.segment
         with open(seg_file, 'a') as f:
-            f.write("{}\t{}\n".format("ReadID", "start", "stop"))
+            f.write("{}\t{}\t{}\n".format("ReadID", "start", "stop"))
     else:
         seg_file = ''
 
@@ -376,7 +376,7 @@ def get_multi_fast5_signal(read_filename, w, squig_file, seg_file):
                 f.write("{}\t{}\n".format(readID, "\t".join(pA_signal)))
         if seg_file:
             with open(seg_file, 'a') as f:
-                f.write("{}\t{}\n".format(readID, seg[0], seg[1]))
+                f.write("{}\t{}\t{}\n".format(readID, seg[0], seg[1]))
         pA_signals[readID] = pA_signal[seg[0]:seg[1]]
         seg_dic[readID] = seg
     # return signal/signals

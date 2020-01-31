@@ -599,7 +599,9 @@ def confidence_margin(npa):
 
 def classify(model, labels, image, subtract_pixel_mean, threshold):
     input_shape = image.shape[1:]
-    x = image.astype('float32') / 255
+    # x = image.astype('float32') / 255
+    x = image.astype('float32') + 1
+    x = x / 2
 
     # If subtract pixel mean is enabled
     if subtract_pixel_mean:

@@ -19,6 +19,11 @@ Please see below further instructions about how to build barcoded direct RNA lib
 - Script to demultiplex direct RNA fast5 reads, barcoded using the strategy described above
 - Example fast5 data built using the 4 custom barcoded adaptors
 
+## Pre-print
+
+https://www.biorxiv.org/content/10.1101/864322v2.abstract
+
+
 ## Installation
 
 ### For Ubuntu 16.04

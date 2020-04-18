@@ -1,0 +1,7 @@
+site_name: deeplexicon Docs
+nav:
+    - Home: index.md
+    - Installation: install.md
+    - Examples: examples.md
+    - Troubleshooting: troubleshooting.md
+theme: readthedocs

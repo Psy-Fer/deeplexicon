@@ -24,7 +24,7 @@ Please see below further instructions about how to build barcoded direct RNA lib
 
 ---
 
-## How to BUILD BARCODED LIBRARIES in direct RNA sequencing:
+## How to BUILD BARCODED LIBRARIES
 
 To build the barcoded libraries, the oligo DNA sequences listed below should be used instead of those coming with the direct RNA sequencing kit (RTA). The barcode is embedded in the oligoA sequence, which will be ligated to the RNA molecule during the library preparation.
 

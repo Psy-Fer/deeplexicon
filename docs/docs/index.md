@@ -19,5 +19,5 @@ You can read the pre-print here: [Barcoding and demultiplexing Oxford Nanopore n
 
 ## Getting help with DeePlexiCon
 
-If you have any troubles using DeePlexiCon, you can leave an issue on the github repo: [deeplexicon](https://github.com/Psy-Fer/deeplexicon).
+If you have any troubles using DeePlexiCon, you can leave an [issue](https://github.com/Psy-Fer/deeplexicon/issues) in the [github repo]((https://github.com/Psy-Fer/deeplexicon) of DeePlexiCon.
 

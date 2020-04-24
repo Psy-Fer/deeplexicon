@@ -1,11 +1,11 @@
 # Welcome to deeplexicon Docs
 
-**deeplexicon** is a tool to demultiplex barcodeded nanopore direct RNA sequencing data, as well as train the models to do so.
+**DeePlexiCon** is a tool to demultiplex barcodeded nanopore direct RNA sequencing data, as well as train the models to do so.
 
 
-Code: **[deeplexicon](https://github.com/Psy-Fer/deeplexicon)**.
+You can find the code here: **[DeePlexiCon](https://github.com/Psy-Fer/deeplexicon)**.
 
-Pre-print: [Barcoding and demultiplexing Oxford Nanopore native RNA sequencing reads with deep residual learning](https://www.biorxiv.org/content/10.1101/864322v2)
+You can read the pre-print here: [Barcoding and demultiplexing Oxford Nanopore native RNA sequencing reads with deep residual learning](https://www.biorxiv.org/content/10.1101/864322v2)
 
 ----
 

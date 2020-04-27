@@ -57,11 +57,15 @@
     
         <ul>
         
-            <li><a class="toctree-l3" href="#large-update-in-progress">....Large update in progress....</a></li>
+            <li><a class="toctree-l3" href="#about-deeplexicon">About DeePlexiCon</a></li>
         
-            <li><a class="toctree-l3" href="#overview">Overview</a></li>
+            <li><a class="toctree-l3" href="#how-to-build-barcoded-libraries">How to BUILD BARCODED LIBRARIES</a></li>
         
-            <li><a class="toctree-l3" href="#getting-help-with-squigglekit">Getting help with SquiggleKit</a></li>
+            <li><a class="toctree-l3" href="#how-to-demultiplex-using-deeplexicon">How to DEMULTIPLEX using DeePlexiCon</a></li>
+        
+            <li><a class="toctree-l3" href="#how-to-train-deeplexicon-with-different-barcodes">How to TRAIN DeePlexiCon with different barcodes</a></li>
+        
+            <li><a class="toctree-l3" href="#getting-help-with-deeplexicon">Getting help with DeePlexiCon</a></li>
         
         </ul>
     
@@ -117,17 +121,54 @@
             <div class="section">
               
                 <h1 id="welcome-to-deeplexicon-docs">Welcome to deeplexicon Docs</h1>
-<p><strong>deeplexicon</strong> is a tool to demultiplex barcodeded nanopore direct RNA sequencing data, as well as train the models to do so.</p>
-<p>Code: <strong><a href="https://github.com/Psy-Fer/deeplexicon">deeplexicon</a></strong>.</p>
-<p>Pre-print: <a href="https://www.biorxiv.org/content/10.1101/864322v2">Barcoding and demultiplexing Oxford Nanopore native RNA sequencing reads with deep residual learning</a></p>
+<p><strong>DeePlexiCon</strong> is a tool to demultiplex barcoded nanopore direct RNA sequencing data, as well as train the models to do so.</p>
+<p>You can find the code here: <strong><a href="https://github.com/Psy-Fer/deeplexicon">DeePlexiCon</a></strong>.</p>
+<p>You can read the pre-print here: <a href="https://www.biorxiv.org/content/10.1101/864322v2">Barcoding and demultiplexing Oxford Nanopore native RNA sequencing reads with deep residual learning</a></p>
 <hr />
-<h3 id="large-update-in-progress"><strong>....Large update in progress....</strong></h3>
+<h2 id="about-deeplexicon">About DeePlexiCon</h2>
+<p>DeePlexiCon is a tool to demultiplex barcoded direct RNA sequencing reads from Oxford Nanopore Technologies.
+Please note that the software has been tested and validated with a set of 4x20bp barcodes listed below:                                     </p>
+<ul>
+<li>Barcode 1: GGCTTCTTCTTGCTCTTAGG</li>
+<li>Barcode 2: GTGATTCTCGTCTTTCTGCG</li>
+<li>Barcode 3: GTACTTTTCTCTTTGCGCGG</li>
+<li>Barcode 4: GGTCTTCGCTCGGTCTTATT</li>
+</ul>
+<p>Please see below further instructions about how to build barcoded direct RNA libraries.</p>
 <hr />
-<h2 id="overview">Overview</h2>
+<h2 id="how-to-build-barcoded-libraries">How to BUILD BARCODED LIBRARIES</h2>
+<p>To build the barcoded libraries, the oligo DNA sequences listed below should be used instead of those coming with the direct RNA sequencing kit (RTA). The barcode is embedded in the oligoA sequence, which will be ligated to the RNA molecule during the library preparation.</p>
+<p>These oligos are designed to barcode libraries which have been enriched with oligodT beads (i.e. RNA should have polyA tail to anneal to oligoB). Each oligoA matches an oligoB.</p>
+<p>OligoA :</p>
+<ul>
+<li>OligoA_shuffle1: 5'-/5Phos/GGCTTCTTCTTGCTCTTAGGTAGTAGGTTC-3' (same as in ONT RTA):</li>
+<li>OligoA_shuffle2: 5'-/5Phos/GTGATTCTCGTCTTTCTGCGTAGTAGGTTC-3'</li>
+<li>OligoA_shuffle3: 5'-/5Phos/GTACTTTTCTCTTTGCGCGGTAGTAGGTTC-3'</li>
+<li>OligoA_shuffle4: 5'-/5Phos/GGTCTTCGCTCGGTCTTATTTAGTAGGTTC-3'</li>
+</ul>
+<p>OligoB:</p>
+<ul>
+<li>OligoB_shuffle1: 5’-GAGGCGAGCGGTCAATTTTCCTAAGAGCAAGAAGAAGCCTTTTTTTTTT-3’  (same as in ONT RTA)</li>
+<li>OligoB_shuffle2: 5’-GAGGCGAGCGGTCAATTTTCGCAGAAAGACGAGAATCACTTTTTTTTTT-3’</li>
+<li>OligoB_shuffle3: 5’-GAGGCGAGCGGTCAATTTTCCGCGCAAAGAGAAAAGTACTTTTTTTTTT-3’</li>
+<li>OligoB_shuffle4: 5’-GAGGCGAGCGGTCAATTTTAATAAGACCGAGCGAAGACCTTTTTTTTTT-3’</li>
+</ul>
 <hr />
-<h2 id="getting-help-with-squigglekit">Getting help with SquiggleKit</h2>
-<p>Happy to help and receive feedback. You can leave an issue on the github repo: <a href="https://github.com/Psy-Fer/deeplexicon">deeplexicon</a>, <a href="https://twitter.com/Psy_Fer_">@Psy_Fer_</a> on twitter, or shoot me an email at <a href="mailto:j.ferguson@garvan.org.au">j.ferguson@garvan.org.au</a></p>
-<p>Created and maintained by <strong>James Ferguson</strong> from <a href="https://www.garvan.org.au/research/kinghorn-centre-for-clinical-genomics/research-programs/genomic-technologies">Genomic Technologies, Kinghorn Centre for Clinical Genomics, Garvan Institute</a>, Sydney Australia.</p>
+<h2 id="how-to-demultiplex-using-deeplexicon">How to DEMULTIPLEX using DeePlexiCon</h2>
+<h3 id="step-1-predict-barcodes-for-each-read">Step 1: Predict barcodes for each read</h3>
+<pre><code>python3 deeplexicon.py -p ~/top/fast5/path/ -f multi -m models/resnet20-final.h5 &gt; output.tsv
+</code></pre>
+<h3 id="step-2-split-your-base-called-fastq-data-please-note-that-you-can-filter-your-outputtsv-based-on-confidence-score-if-you-prefer-to-increase-accuracy-at-the-cost-of-recovery">Step 2: Split your base-called fastq data (please note that you can filter your output.tsv based on confidence score if you prefer to increase accuracy at the cost of recovery)</h3>
+<pre><code>python3 fastq_splitter.py -d output.tsv -q combined.fastq -o dmux_folder/ -s sample_name
+</code></pre>
+<h3 id="notes">Notes</h3>
+<p>Please note, the current algorithm has been trained to demultiplex the 4 barcodes shown above. It will not accurately demultiplex reads if different sequences are used.</p>
+<hr />
+<h2 id="how-to-train-deeplexicon-with-different-barcodes">How to TRAIN DeePlexiCon with different barcodes</h2>
+<p>Coming soon</p>
+<hr />
+<h2 id="getting-help-with-deeplexicon">Getting help with DeePlexiCon</h2>
+<p>If you have any troubles using DeePlexiCon, you can leave an <a href="https://github.com/Psy-Fer/deeplexicon/issues">issue</a> in the <a href="https://github.com/Psy-Fer/deeplexicon">github repo</a> of DeePlexiCon.</p>
               
             </div>
           </div>
@@ -176,5 +217,5 @@
 
 <!--
 MkDocs version : 1.0.4
-Build Date UTC : 2020-04-17 14:01:38
+Build Date UTC : 2020-04-27 11:19:27
 -->

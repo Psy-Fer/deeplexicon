@@ -149,7 +149,9 @@ def main():
     VERSION = "1.0.0"
 
     parser = MyParser(
-        description="DeePlexiCon - Demultiplex direct RNA reads")
+        prog='deeplexicon',
+        description="deeplexicon - Demultiplex ONT direct RNA reads",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     #group = parser.add_mutually_exclusive_group()
     parser.add_argument("-p", "--path",
                         help="Top path of fast5 files to dmux")
@@ -157,8 +159,8 @@ def main():
                         help="Multi or single fast5s")
     parser.add_argument("-c", "--config",
                         help="config file")
-    # parser.add_argument("-g", "--gpu_list", default=1
-    #                     help="list of gpus, 1, or [1,3,5], etc. of PCI_BUS_ID order")
+    parser.add_argument("-g", "--gpu_list", default=1,
+                        help="list of gpus, 1, or [1,3,5], etc. of PCI_BUS_ID order")
     # parser.add_argument("-o", "--output",
     #                     help="Output directory")
     parser.add_argument("-s", "--threshold", type=float, default=0.50,
@@ -173,10 +175,10 @@ def main():
                         help="dump segment data into this .tsv file")
     parser.add_argument("-b", "--batch_size", type=int, default=4000,
                         help="batch size - for single fast5s")
-    parser.add_argument("-V", "--version",
+    parser.add_argument(('--version', action='version', version='%(prog)s {}'.format(VERSION))
                         help="Prints version")
-    parser.add_argument("-v", "--verbose", action="store_true",
-                        help="Verbose output")
+    parser.add_argument("-v", "--verbose", action='count', default=0,
+                        help="Verbose output [-v/-vv/-vvv = 1, 2, 3]")
 
     args = parser.parse_args()
     # print help if no arguments given
@@ -184,7 +186,7 @@ def main():
         parser.print_help(sys.stderr)
         sys.exit(1)
 
-    if args.verbose:
+    if args.verbose > 0:
         print_verbose("Verbose mode active - dumping info to stderr")
         print_verbose("DeePlexiCon: {}".format(VERSION))
         print_verbose("arg list: {}".format(args))
@@ -263,7 +265,7 @@ def main():
                         for readID, out, c, P in C:
                             prob = [round(float(i), 6) for i in P]
                             cm = round(float(c), 4)
-                            if args.verbose:
+                            if args.verbose > 0:
                                 print_verbose("cm is: {}".format(cm))
                             print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, prob[0], prob[1], prob[2], prob[3]))
                         labels = []
@@ -290,13 +292,13 @@ def main():
                             for readID, out, c, P in C:
                                 prob = [round(float(i), 6) for i in P]
                                 cm = round(float(c), 4)
-                                if args.verbose:
+                                if args.verbose > 0:
                                     print_verbose("cm is: {}".format(cm))
                                 print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcde_out[out], cm, prob[0], prob[1], prob[2], prob[3]))
                             labels = []
                             images = []
                             fast5s = {}
-                        elif args.verbose:
+                        elif args.verbose > 0:
                             print_verbose("analysing sig_count: {}/{}".format(sig_count, len(seg_signal)))
                         else:
                             blah = 0 # clean
@@ -306,7 +308,7 @@ def main():
     for readID, out, c, P in C:
         prob = [round(float(i), 6) for i in P]
         cm = round(float(c), 4)
-        if args.verbose:
+        if args.verbose > 0:
             print_verbose("cm is: {}".format(cm))
         print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, prob[0], prob[1], prob[2], prob[3]))
     labels = []

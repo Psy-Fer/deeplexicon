@@ -64,7 +64,7 @@ def main():
     parser.add_argument("-o", "--output",
                         help="output path")
     parser.add_argument("-s", "--sample", default="dmux_",
-                        help="sampl name to append to file names")
+                        help="sample name to append to file names")
 
 
     args = parser.parse_args()

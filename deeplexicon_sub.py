@@ -16,25 +16,25 @@ import traceback
 import math
 import numpy as np
 # from PIL import Image
-import pyts
-from pyts.image import MarkovTransitionField, GramianAngularField, RecurrencePlot
-import tensorflow as tf
-import keras
-from keras.layers import Dense, Conv2D, BatchNormalization, Activation
-from keras.layers import AveragePooling2D, Input, Flatten
-from keras.optimizers import Adam
-from keras.callbacks import ModelCheckpoint, LearningRateScheduler
-from keras.callbacks import ReduceLROnPlateau
-from keras.preprocessing.image import ImageDataGenerator
-from keras.utils import multi_gpu_model
-from keras.regularizers import l2
-from keras import backend as K
-from keras.models import Model
-import pandas as pd
-from sklearn import datasets, linear_model
-from sklearn.model_selection import train_test_split
-from tensorflow.python.client import device_lib
-from keras.models import load_model
+# import pyts
+# from pyts.image import MarkovTransitionField, GramianAngularField, RecurrencePlot
+# import tensorflow as tf
+# import keras
+# from keras.layers import Dense, Conv2D, BatchNormalization, Activation
+# from keras.layers import AveragePooling2D, Input, Flatten
+# from keras.optimizers import Adam
+# from keras.callbacks import ModelCheckpoint, LearningRateScheduler
+# from keras.callbacks import ReduceLROnPlateau
+# from keras.preprocessing.image import ImageDataGenerator
+# from keras.utils import multi_gpu_model
+# from keras.regularizers import l2
+# from keras import backend as K
+# from keras.models import Model
+# import pandas as pd
+# from sklearn import datasets, linear_model
+# from sklearn.model_selection import train_test_split
+# from tensorflow.python.client import device_lib
+# from keras.models import load_model
 
 
 '''
@@ -149,7 +149,8 @@ def main():
 
     parser = MyParser(
         description="DeePlexiCon - Demultiplex barcoded ONT direct-RNA sequencing reads",
-        epilog="Citation: enter publication here...")
+        epilog="Citation: enter publication here...",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     subcommand = parser.add_subparsers(help='subcommand --help for help messages', dest="command")
 
     # main options for base level checks and version output
@@ -159,19 +160,20 @@ def main():
                         help="Verbose output [v/vv/vvv]")
 
     # sub-module for dmux command
-    dmux = subcommand.add_parser('dmux', help='demultiplex dRNA reads')
+    dmux = subcommand.add_parser('dmux', help='demultiplex dRNA reads',
+                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     # dmux sub-module options
-    dmux.add_argument("-p", "--path",
-                        help="Top path of fast5 files to dmux")
+    dmux.add_argument("-p", "--path", nargs='+',
+                        help="Top path(s) of fast5 files to dmux")
     dmux.add_argument("-f", "--form", default="multi", choices=["multi", "single"],
                         help="Multi or single fast5s")
     dmux.add_argument("-s", "--threshold", type=float, default=0.50,
                         help="probability threshold - 0.5 hi accuracy / 0.3 hi recovery")
     dmux.add_argument("-m", "--model",
                         help="Trained model name to use")
-    dmux.add_argument("--squiggle",
+    dmux.add_argument("--squiggle", default=False,
                         help="dump squiggle data into this .tsv file")
-    dmux.add_argument("--segment",
+    dmux.add_argument("--segment", default=False,
                         help="dump segment data into this .tsv file")
     dmux.add_argument("-b", "--batch_size", type=int, default=4000,
                         help="batch size - for single fast5s")
@@ -179,7 +181,8 @@ def main():
                         help="Verbose output [v/vv/vvv]")
 
     # sub-module for split command
-    split = subcommand.add_parser('split', help='split a fastq file into barcode categories')
+    split = subcommand.add_parser('split', help='split a fastq file into barcode categories',
+                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     # split sub-module options
     split.add_argument("-i", "--input",
                         help="deeplexicon dmux output tsv file")
@@ -193,14 +196,32 @@ def main():
                         help="Verbose output [v/vv/vvv]")
 
     # sub-module for train command
-    train = subcommand.add_parser('train', help='train a demultiplexing model')
+    train = subcommand.add_parser('train', help='train a demultiplexing model',
+                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     # train sub-module options
+    # take all fast5s, for each read, check train_truth and convert
+    # repeat for test_truth - could add in validation set too using dmux?
     # data, settings, model output, tmp?,
+    train.add_argument('-p', '--path', nargs='+',
+                        help="Input path(s) of all used fast5s")
+    train.add_argument('-t', '--train_truth', nargs='+',
+                        help="Traiing truth set(s) in one-hot format eg: readID, 0, 0, 1, 0 for barcode 3 of 4 ")
+    train.add_argument('-s', '--test_truth', nargs='+',
+                        help="Testing truth set(s) in one-hot format eg: readID, 0, 0, 1, 0 for barcode 3 of 4 ")
+    train.add_argument('-u', '--val_truth', nargs='+',
+                        help="Validation truth set(s) in one-hot format eg: readID, 0, 0, 1, 0 for barcode 3 of 4 ")
+    train.add_argument('-n', '--network', default="ResNet20",
+                        help="Network to use (see table in docs)")
+    train.add_argument('--net_version', type=int, default=2,
+                        help="Network version to use (see table in docs)")
+    train.add_argument('-e', '--epochs', type=int, default=40,
+                        help="epochs to run")
     train.add_argument('-v', '--verbose', action='count', default=0,
                         help="Verbose output [v/vv/vvv]")
 
     # sub-module for squig command
-    squig = subcommand.add_parser('squig', help='extract/segment squiggles - no dmux')
+    squig = subcommand.add_parser('squig', help='extract/segment squiggles - no dmux',
+                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     # squig sub-module options
     squig.add_argument("--squiggle",
                         help="dump squiggle data into this .tsv file")
@@ -231,10 +252,52 @@ def main():
     # Ensure non-command use is exited before this point
     # Perfect time to do arg checks before pipeline calls
     if args.command == "dmux":
+        import pyts
+        from pyts.image import MarkovTransitionField, GramianAngularField, RecurrencePlot
+        import tensorflow as tf
+        import keras
+        from keras.layers import Dense, Conv2D, BatchNormalization, Activation
+        from keras.layers import AveragePooling2D, Input, Flatten
+        from keras.optimizers import Adam
+        from keras.callbacks import ModelCheckpoint, LearningRateScheduler
+        from keras.callbacks import ReduceLROnPlateau
+        from keras.preprocessing.image import ImageDataGenerator
+        from keras.utils import multi_gpu_model
+        from keras.regularizers import l2
+        from keras import backend as K
+        from keras.models import Model
+        import pandas as pd
+        from sklearn import datasets, linear_model
+        from sklearn.model_selection import train_test_split
+        from tensorflow.python.client import device_lib
+        from keras.models import load_model
+
         dmux_pipeline(args)
     elif args.command == "split":
         split_pipeline(args)
     elif args.command == "train":
+
+        import pyts
+        from pyts.image import MarkovTransitionField, GramianAngularField, RecurrencePlot
+        import tensorflow as tf
+        import keras
+        from keras.layers import Dense, Conv2D, BatchNormalization, Activation
+        from keras.layers import AveragePooling2D, Input, Flatten
+        from keras.optimizers import Adam
+        from keras.callbacks import ModelCheckpoint, LearningRateScheduler
+        from keras.callbacks import ReduceLROnPlateau
+        from keras.preprocessing.image import ImageDataGenerator
+        from keras.utils import multi_gpu_model
+        from keras.regularizers import l2
+        from keras import backend as K
+        from keras.models import Model
+        import pandas as pd
+        from sklearn import datasets, linear_model
+        from sklearn.model_selection import train_test_split
+        from tensorflow.python.client import device_lib
+        from keras.models import load_model
+
+        print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
         train_pipeline(args)
     elif args.command == "squig":
         squig_pipeline(args)
@@ -530,8 +593,9 @@ def read_single_fast5(filename):
         return f5_dic
     try:
         c = list(hdf['Raw/Reads'].keys())
-        for col in hdf['Raw/Reads/'][c[0]]['Signal'][()]:
-            f5_dic['signal'].append(int(col))
+        # for col in hdf['Raw/Reads/'][c[0]]['Signal'][()]:
+        #     f5_dic['signal'].append(int(col))
+        f5_dic['signal'] = hdf['Raw/Reads/'][c[0]]['Signal'][()]
 
         f5_dic['readID'] = hdf['Raw/Reads/'][c[0]].attrs['read_id'].decode()
         f5_dic['digitisation'] = hdf['UniqueGlobalKey/channel_id'].attrs['digitisation']
@@ -557,9 +621,7 @@ def read_multi_fast5(filename):
             f5_dic[read] = {'signal': [], 'readID': '', 'digitisation': 0.0,
                             'offset': 0.0, 'range': 0.0, 'sampling_rate': 0.0}
             try:
-                for col in hdf[read]['Raw/Signal'][()]:
-                    f5_dic[read]['signal'].append(int(col))
-
+                f5_dic[read]['signal'] = hdf[read]['Raw/Signal'][()]
                 f5_dic[read]['readID'] = hdf[read]['Raw'].attrs['read_id'].decode()
                 f5_dic[read]['digitisation'] = hdf[read]['channel_id'].attrs['digitisation']
                 f5_dic[read]['offset'] = hdf[read]['channel_id'].attrs['offset']
@@ -1179,18 +1241,96 @@ def train_pipeline(args):
                                 callbacks=callbacks)
         return(history)
 
-    # make args
-    (run_name, net_type,version,  epochs,  x_train, y_train, x_test, y_test,
-               gpus=1,per_gpu_batch_size=16,tensorboard_output=None, data_augmentation = False, subtract_pixel_mean = False, verbose=0):
-
-    args.network="ResNet20"
-    args.net_version=2
-    args.epochs=
-    x_train, y_train, x_test, y_test
 
 
-    ret=train_model(args.prefix, "ResNet20",2,  epochs,  x_train, y_train, x_test, y_test,
-               gpus=gpus,per_gpu_batch_size=16
+    # actual pipeline
+    # get test/train IDs
+    train_truth_dic = {}
+    train_readIDs = set()
+    test_readIDs = set()
+    val_readIDs = set()
+    for train_file in args.train_truth:
+        with open(train_file, 'rt') as tt:
+            for l in tt:
+                l = l.strip("\n")
+                l = l.split("\t")
+                if len(l) < 3:
+                    l = l.split(",")
+                readID = l[0]
+                train_truth_dic[readID] = np.array([int(i) for i in l[1:]], dtype=int)
+    train_readIDs = set(train_truth_dic.keys())
+
+    test_truth_dic = {}
+    for test_file in args.test_truth:
+        with open(test_file, 'rt') as tt:
+            for l in tt:
+                l = l.strip("\n")
+                l = l.split("\t")
+                if len(l) < 3:
+                    l = l.split(",")
+                readID = l[0]
+                test_truth_dic[readID] = np.array([int(i) for i in l[1:]], dtype=int)
+    test_readIDs = set(test_truth_dic.keys())
+
+    if agrs.val_truth:
+        val_truth_dic = {}
+        for val_file in args.val_truth:
+            with open(val_file, 'rt') as tt:
+                for l in tt:
+                    l = l.strip("\n")
+                    l = l.split("\t")
+                    if len(l) < 3:
+                        l = l.split(",")
+                    readID = l[0]
+                    val_truth_dic[readID] = np.array([int(i) for i in l[1:]], dtype=int)
+        val_readIDs = set(val_truth_dic.keys())
+
+    # read fast5s and convert them to images
+    labels = []
+    images = []
+    fast5s = {}
+    seg_dic = {}
+    for p in train.path:
+        for dirpath, dirnames, files in os.walk(p):
+            for fast5 in files:
+                if fast5.endswith('.fast5'):
+                    fast5_file = os.path.join(dirpath, fast5)
+                    seg_signal = get_multi_fast5_signal(fast5_file, window, False, False)
+                    train_count = 0
+                    test_count = 0
+                    val_count = 0
+                    for readID in seg_signal:
+                        if readID in train_readIDs:
+                            img = convert_to_image(np.array(seg_signal[readID], dtype=float))
+                            train_labels.append(train_truth_dic[readID])
+                            train_images.append(img)
+                            train_fast5s[readID] = fast5
+                            train_count += 1
+                        elif readID in test_readIDs:
+                            img = convert_to_image(np.array(seg_signal[readID], dtype=float))
+                            test_labels.append(test_truth_dic[readID])
+                            test_images.append(img)
+                            test_fast5s[readID] = fast5
+                            test_count += 1
+                        elif readID in val_readIDs:
+                            img = convert_to_image(np.array(seg_signal[readID], dtype=float))
+                            val_labels.append(val_truth_dic[readID])
+                            val_images.append(img)
+                            val_fast5s[readID] = fast5
+                            val_count += 1
+
+                        else:
+                            continue
+
+
+    ret=train_model(args.prefix, args.network, args.net_version, args.epochs,  train_images, train_labels, test_images, test_labels,
+               gpus=gpus,per_gpu_batch_size=16)
+
+    print(ret)
+    # tie verbose to --verbose?
+    if args.val_truth:
+        scores = model.evaluate(val_images, val_labels, verbose=1)
+        print('Validation loss: {} accuracy: {}'.format(scores[0], scores[1]))
 
     return
 

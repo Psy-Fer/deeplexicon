@@ -74,7 +74,7 @@
         
             <li><a class="toctree-l3" href="#step-1-predict-barcodes-for-each-read">Step 1: Predict barcodes for each read</a></li>
         
-            <li><a class="toctree-l3" href="#step-2-split-your-base-called-fastq-data-please-note-that-you-can-filter-your-outputtsv-based-on-confidence-score-if-you-prefer-to-increase-accuracy-at-the-cost-of-recovery">Step 2: Split your base-called fastq data (please note that you can filter your output.tsv based on confidence score if you prefer to increase accuracy at the cost of recovery)</a></li>
+            <li><a class="toctree-l3" href="#step-2-split-your-base-called-fastq-data">Step 2: Split your base-called fastq data</a></li>
         
             <li><a class="toctree-l3" href="#notes">Notes</a></li>
         
@@ -145,7 +145,8 @@
 <h3 id="step-1-predict-barcodes-for-each-read">Step 1: Predict barcodes for each read</h3>
 <pre><code>python3 deeplexicon.py dmux -p ~/top/fast5/path/ -f multi -m models/resnet20-final.h5 &gt; output.tsv
 </code></pre>
-<h3 id="step-2-split-your-base-called-fastq-data-please-note-that-you-can-filter-your-outputtsv-based-on-confidence-score-if-you-prefer-to-increase-accuracy-at-the-cost-of-recovery">Step 2: Split your base-called fastq data (please note that you can filter your output.tsv based on confidence score if you prefer to increase accuracy at the cost of recovery)</h3>
+<h3 id="step-2-split-your-base-called-fastq-data">Step 2: Split your base-called fastq data</h3>
+<p>(please note that you can filter your output.tsv based on confidence score if you prefer to increase accuracy at the cost of recovery)</p>
 <pre><code>python3 deeplexicon.py split -i output.tsv -q combined.fastq -o dmux_folder/ -s sample_name
 </code></pre>
 <h3 id="notes">Notes</h3>

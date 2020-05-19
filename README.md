@@ -24,6 +24,10 @@ Please see below further instructions about how to build barcoded direct RNA lib
 https://www.biorxiv.org/content/10.1101/864322v2.abstract
 
 
+## Full documentation here
+
+https://psy-fer.github.io/deeplexicon/
+
 ## Installation
 
 ### For Ubuntu 16.04
@@ -60,6 +64,25 @@ https://www.biorxiv.org/content/10.1101/864322v2.abstract
 
 <!-- source Deeplexicon/bin/activate
 pip3 install Keras tensorflow-gpu Pandas PyTs Scikit-learn numba==0.45.0 -->
+
+## Version 1.1.0 (pre-release)
+
+## Demultiplex the reads (fast5 input)
+
+    python3 deeplexicon.py dmux -p ~/top/fast5/path/ -f multi -m models/resnet20-final.h5 > output.tsv
+
+## Split fastq
+
+    python3 deeplexicon.py split -i output.tsv -q combined.fastq -o dmux_folder/ -s sample_name
+
+## Train a new model
+
+Please see full documentation for further explanation
+
+    python deeplexicon.py train --path /fast5/top/path/ --train_truth train.tsv --test_truth test.tsv -- val_truth val.tsv
+
+
+## Version 1.0.0 (stable)
 
 ## Running the software
 

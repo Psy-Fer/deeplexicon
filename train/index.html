@@ -170,7 +170,7 @@ Of course, this can be extended to any number of barcodes required, and accross 
 <h3 id="running-the-training">Running the training</h3>
 <p>Training requires a CUDA compatible GPU and the correct libraries installed.</p>
 <p>Commence training, with validation, with the following:</p>
-<pre><code>python deeplexicon.py train --path /fast5/top/path/ --train_truth train.tsv --test_truth test.tsv -- val_truth val.tsv
+<pre><code>python deeplexicon.py train --path /fast5/top/path/ --train_truth train.tsv --test_truth test.tsv --val_truth val.tsv
 </code></pre>
 <h3 id="full-description">Full description</h3>
 <pre><code>train.add_argument('-p', '--path', nargs='+',

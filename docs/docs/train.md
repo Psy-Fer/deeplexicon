@@ -38,7 +38,7 @@ Training requires a CUDA compatible GPU and the correct libraries installed.
 
 Commence training, with validation, with the following:
 
-    python deeplexicon.py train --path /fast5/top/path/ --train_truth train.tsv --test_truth test.tsv -- val_truth val.tsv
+    python deeplexicon.py train --path /fast5/top/path/ --train_truth train.tsv --test_truth test.tsv --val_truth val.tsv
 
 
 

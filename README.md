@@ -79,7 +79,7 @@ pip3 install Keras tensorflow-gpu Pandas PyTs Scikit-learn numba==0.45.0 -->
 
 Please see full documentation for further explanation
 
-    python deeplexicon.py train --path /fast5/top/path/ --train_truth train.tsv --test_truth test.tsv -- val_truth val.tsv
+    python deeplexicon.py train --path /fast5/top/path/ --train_truth train.tsv --test_truth test.tsv --val_truth val.tsv
 
 
 ## Version 1.0.0 (stable)

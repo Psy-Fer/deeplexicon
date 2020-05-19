@@ -59,7 +59,7 @@ Please note, the current algorithm has been trained to demultiplex the 4 barcode
 ----
 ## How to TRAIN DeePlexiCon with different barcodes
 
-    python deeplexicon.py train --path /fast5/top/path/ --train_truth train.tsv --test_truth test.tsv -- val_truth val.tsv
+    python deeplexicon.py train --path /fast5/top/path/ --train_truth train.tsv --test_truth test.tsv --val_truth val.tsv
 
 ----
 ## Getting help with DeePlexiCon

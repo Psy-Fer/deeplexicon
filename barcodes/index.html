@@ -8,7 +8,7 @@
   
   
   <link rel="shortcut icon" href="../img/favicon.ico">
-  <title>Installation - deeplexicon Docs</title>
+  <title>Barcodes - deeplexicon Docs</title>
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="../css/theme.css" type="text/css" />
@@ -17,8 +17,8 @@
   
   <script>
     // Current page data
-    var mkdocs_page_name = "Installation";
-    var mkdocs_page_input_path = "install.md";
+    var mkdocs_page_name = "Barcodes";
+    var mkdocs_page_input_path = "barcodes.md";
     var mkdocs_page_url = null;
   </script>
   
@@ -53,26 +53,20 @@
     <a class="" href="..">Home</a>
 	    </li>
           
-            <li class="toctree-l1">
-		
-    <a class="" href="../barcodes/">Barcodes</a>
-	    </li>
-          
             <li class="toctree-l1 current">
 		
-    <a class="current" href="./">Installation</a>
+    <a class="current" href="./">Barcodes</a>
     <ul class="subnav">
             
-    <li class="toctree-l2"><a href="#how-to-install-deeplexicon">How to install DeePlexiCon</a></li>
-    
-        <ul>
-        
-            <li><a class="toctree-l3" href="#getting-python37-and-setting-up-environments">Getting python3.7 and setting up environments</a></li>
-        
-        </ul>
+    <li class="toctree-l2"><a href="#how-to-build-barcoded-libraries">How to BUILD BARCODED LIBRARIES</a></li>
     
 
     </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../install/">Installation</a>
 	    </li>
           
             <li class="toctree-l1">
@@ -127,7 +121,7 @@
     
       
     
-    <li>Installation</li>
+    <li>Barcodes</li>
     <li class="wy-breadcrumbs-aside">
       
     </li>
@@ -137,35 +131,24 @@
           <div role="main">
             <div class="section">
               
-                <h1 id="how-to-install-deeplexicon">How to install DeePlexiCon</h1>
-<p><strong>DeePlexiCon</strong> is built to work in python 3.7 and is quite sensitive to python versions, as well as library versions such as <code>PyTs</code>.</p>
-<p>Linux is also prefered, and no support for MacOS or Windows will be provided.
-All options excepty <code>train</code> should work on any OS if set up correctly, however we strongly advise using <code>train</code> on Ubuntu.</p>
-<h2 id="getting-python37-and-setting-up-environments">Getting python3.7 and setting up environments</h2>
-<p>Many systems won't have python3.7, so here is how to get it, and create environments with it. (on Ubuntu &lt;=16.04, 3.7 isn't in the default ppa repos)</p>
-<pre><code>sudo add-apt-repository ppa:deadsnakes/ppa
-sudo apt-get update
-sudo apt install python3.7 python3.7-dev python3.7-venv
-</code></pre>
-<h4 id="create-environtment">Create environtment</h4>
-<pre><code>python3.7 -m venv ./Deeplexicon/
-</code></pre>
-<h4 id="clone-git-repository">clone git repository</h4>
-<pre><code>git clone https://github.com/Psy-Fer/deeplexicon.git
-</code></pre>
-<h4 id="source-and-install-requirements-cpu">source and install requirements (CPU)</h4>
-<p>Keep in mind, these versions are crucial to expected operation.</p>
-<pre><code>source Deeplexicon/bin/activate
-pip install h5py Keras==2.2.4 pandas PyTs==0.8.0 Scikit-learn numba==0.45.0 TensorFlow==1.13.1
-</code></pre>
-<h4 id="done">Done!</h4>
-<p>That's it. To simplify running things, you can add <code>deeplexicon.py</code> to your $PATH
-Just add the following to your ~/.bashrc or run in your current shell</p>
-<pre><code>export PATH="/path/to/deeplexicon:$PATH"
-</code></pre>
-<!-- TODO: add deeplexicon to pip and make executable -->
-
-<!-- TODO: aff tesnorflow-gpu instruction -->
+                <h1 id="how-to-build-barcoded-libraries">How to BUILD BARCODED LIBRARIES</h1>
+<p>To build the barcoded libraries, the oligo DNA sequences listed below should be used instead of those coming with the direct RNA sequencing kit (RTA). The barcode is embedded in the oligoA sequence, which will be ligated to the RNA molecule during the library preparation.</p>
+<p>These oligos are designed to barcode libraries which have been enriched with oligodT beads (i.e. RNA should have polyA tail to anneal to oligoB). Each oligoA matches an oligoB.</p>
+<p>OligoA :</p>
+<ul>
+<li>OligoA_shuffle1: 5'-/5Phos/GGCTTCTTCTTGCTCTTAGGTAGTAGGTTC-3' (same as in ONT RTA):</li>
+<li>OligoA_shuffle2: 5'-/5Phos/GTGATTCTCGTCTTTCTGCGTAGTAGGTTC-3'</li>
+<li>OligoA_shuffle3: 5'-/5Phos/GTACTTTTCTCTTTGCGCGGTAGTAGGTTC-3'</li>
+<li>OligoA_shuffle4: 5'-/5Phos/GGTCTTCGCTCGGTCTTATTTAGTAGGTTC-3'</li>
+</ul>
+<p>OligoB:</p>
+<ul>
+<li>OligoB_shuffle1: 5’-GAGGCGAGCGGTCAATTTTCCTAAGAGCAAGAAGAAGCCTTTTTTTTTT-3’  (same as in ONT RTA)</li>
+<li>OligoB_shuffle2: 5’-GAGGCGAGCGGTCAATTTTCGCAGAAAGACGAGAATCACTTTTTTTTTT-3’</li>
+<li>OligoB_shuffle3: 5’-GAGGCGAGCGGTCAATTTTCCGCGCAAAGAGAAAAGTACTTTTTTTTTT-3’</li>
+<li>OligoB_shuffle4: 5’-GAGGCGAGCGGTCAATTTTAATAAGACCGAGCGAAGACCTTTTTTTTTT-3’</li>
+</ul>
+<!-- TODO: Link to protocol -->
               
             </div>
           </div>
@@ -173,10 +156,10 @@ Just add the following to your ~/.bashrc or run in your current shell</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../dmux/" class="btn btn-neutral float-right" title="Demultiplexing">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../install/" class="btn btn-neutral float-right" title="Installation">Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
-        <a href="../barcodes/" class="btn btn-neutral" title="Barcodes"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href=".." class="btn btn-neutral" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   
@@ -202,10 +185,10 @@ Just add the following to your ~/.bashrc or run in your current shell</p>
     <span class="rst-current-version" data-toggle="rst-current-version">
       
       
-        <span><a href="../barcodes/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+        <span><a href=".." style="color: #fcfcfc;">&laquo; Previous</a></span>
       
       
-        <span style="margin-left: 15px"><a href="../dmux/" style="color: #fcfcfc">Next &raquo;</a></span>
+        <span style="margin-left: 15px"><a href="../install/" style="color: #fcfcfc">Next &raquo;</a></span>
       
     </span>
 </div>

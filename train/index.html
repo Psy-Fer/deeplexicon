@@ -8,7 +8,7 @@
   
   
   <link rel="shortcut icon" href="../img/favicon.ico">
-  <title>Installation - deeplexicon Docs</title>
+  <title>Train a model - deeplexicon Docs</title>
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="../css/theme.css" type="text/css" />
@@ -17,8 +17,8 @@
   
   <script>
     // Current page data
-    var mkdocs_page_name = "Installation";
-    var mkdocs_page_input_path = "install.md";
+    var mkdocs_page_name = "Train a model";
+    var mkdocs_page_input_path = "train.md";
     var mkdocs_page_url = null;
   </script>
   
@@ -58,21 +58,9 @@
     <a class="" href="../barcodes/">Barcodes</a>
 	    </li>
           
-            <li class="toctree-l1 current">
+            <li class="toctree-l1">
 		
-    <a class="current" href="./">Installation</a>
-    <ul class="subnav">
-            
-    <li class="toctree-l2"><a href="#how-to-install-deeplexicon">How to install DeePlexiCon</a></li>
-    
-        <ul>
-        
-            <li><a class="toctree-l3" href="#getting-python37-and-setting-up-environments">Getting python3.7 and setting up environments</a></li>
-        
-        </ul>
-    
-
-    </ul>
+    <a class="" href="../install/">Installation</a>
 	    </li>
           
             <li class="toctree-l1">
@@ -85,9 +73,25 @@
     <a class="" href="../split/">Split fastq</a>
 	    </li>
           
-            <li class="toctree-l1">
+            <li class="toctree-l1 current">
 		
-    <a class="" href="../train/">Train a model</a>
+    <a class="current" href="./">Train a model</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#train-a-custom-model">Train a custom model</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#input-requirements">Input requirements</a></li>
+        
+            <li><a class="toctree-l3" href="#running-the-training">Running the training</a></li>
+        
+            <li><a class="toctree-l3" href="#full-description">Full description</a></li>
+        
+        </ul>
+    
+
+    </ul>
 	    </li>
           
             <li class="toctree-l1">
@@ -127,7 +131,7 @@
     
       
     
-    <li>Installation</li>
+    <li>Train a model</li>
     <li class="wy-breadcrumbs-aside">
       
     </li>
@@ -137,35 +141,55 @@
           <div role="main">
             <div class="section">
               
-                <h1 id="how-to-install-deeplexicon">How to install DeePlexiCon</h1>
-<p><strong>DeePlexiCon</strong> is built to work in python 3.7 and is quite sensitive to python versions, as well as library versions such as <code>PyTs</code>.</p>
-<p>Linux is also prefered, and no support for MacOS or Windows will be provided.
-All options excepty <code>train</code> should work on any OS if set up correctly, however we strongly advise using <code>train</code> on Ubuntu.</p>
-<h2 id="getting-python37-and-setting-up-environments">Getting python3.7 and setting up environments</h2>
-<p>Many systems won't have python3.7, so here is how to get it, and create environments with it. (on Ubuntu &lt;=16.04, 3.7 isn't in the default ppa repos)</p>
-<pre><code>sudo add-apt-repository ppa:deadsnakes/ppa
-sudo apt-get update
-sudo apt install python3.7 python3.7-dev python3.7-venv
+                <h1 id="train-a-custom-model">Train a custom model</h1>
+<p>To train a custom model, a dataset with each barcode attached to a read that will uniquly map with regard to all other barcodes is required.</p>
+<p>Some examples:</p>
+<ul>
+<li>Synthetic RNA controls <a href="https://www.sequinstandards.com/">sequins</a> attached to each barcode</li>
+<li>Different species for each barcode</li>
+</ul>
+<p>So long as when you map with minimap2, you can group the reads by expected barcode output.</p>
+<h3 id="input-requirements">Input requirements</h3>
+<ol>
+<li>Raw fast5 files</li>
+<li>Truth table of readID-&gt;barcode</li>
+</ol>
+<p>The truth table of readIDs should be in one-hot format, ie,</p>
+<pre><code>readID  1   0   0   0
+readID  0   1   0   0
+readID  0   0   1   0
+readID  0   0   0   1
 </code></pre>
-<h4 id="create-environtment">Create environtment</h4>
-<pre><code>python3.7 -m venv ./Deeplexicon/
+<p>With binary classification of barcode 1, 2, 3, 4 respectively.
+Of course, this can be extended to any number of barcodes required, and accross multiple runs.</p>
+<p>This should then be split into <code>training</code>, <code>testing</code>, and <code>validation</code> files.</p>
+<p>Do this by placing:
+- 80% of the reads into a <code>training</code> file. <code>--train_truth</code>
+- 10% of the reads into a <code>testing</code> file. <code>--test_truth</code>
+- 10% of the reads into a <code>validation</code> file. <code>--val_truth</code></p>
+<h3 id="running-the-training">Running the training</h3>
+<p>Training requires a CUDA compatible GPU and the correct libraries installed.</p>
+<p>Commence training, with validation, with the following:</p>
+<pre><code>python deeplexicon.py train --path /fast5/top/path/ --train_truth train.tsv --test_truth test.tsv -- val_truth val.tsv
 </code></pre>
-<h4 id="clone-git-repository">clone git repository</h4>
-<pre><code>git clone https://github.com/Psy-Fer/deeplexicon.git
+<h3 id="full-description">Full description</h3>
+<pre><code>train.add_argument('-p', '--path', nargs='+',
+                    help="Input path(s) of all used fast5s")
+train.add_argument('-t', '--train_truth', nargs='+',
+                    help="Traiing truth set(s) in one-hot format eg: readID, 0, 0, 1, 0 for barcode 3 of 4 ")
+train.add_argument('-s', '--test_truth', nargs='+',
+                    help="Testing truth set(s) in one-hot format eg: readID, 0, 0, 1, 0 for barcode 3 of 4 ")
+train.add_argument('-u', '--val_truth', nargs='+',
+                    help="Validation truth set(s) in one-hot format eg: readID, 0, 0, 1, 0 for barcode 3 of 4 ")
+train.add_argument('-n', '--network', default="ResNet20",
+                    help="Network to use (see table in docs)")
+train.add_argument('--net_version', type=int, default=2,
+                    help="Network version to use (see table in docs)")
+train.add_argument('-e', '--epochs', type=int, default=40,
+                    help="epochs to run")
+train.add_argument('-v', '--verbose', action='count', default=0,
+                    help="Verbose output [v/vv/vvv]")
 </code></pre>
-<h4 id="source-and-install-requirements-cpu">source and install requirements (CPU)</h4>
-<p>Keep in mind, these versions are crucial to expected operation.</p>
-<pre><code>source Deeplexicon/bin/activate
-pip install h5py Keras==2.2.4 pandas PyTs==0.8.0 Scikit-learn numba==0.45.0 TensorFlow==1.13.1
-</code></pre>
-<h4 id="done">Done!</h4>
-<p>That's it. To simplify running things, you can add <code>deeplexicon.py</code> to your $PATH
-Just add the following to your ~/.bashrc or run in your current shell</p>
-<pre><code>export PATH="/path/to/deeplexicon:$PATH"
-</code></pre>
-<!-- TODO: add deeplexicon to pip and make executable -->
-
-<!-- TODO: aff tesnorflow-gpu instruction -->
               
             </div>
           </div>
@@ -173,10 +197,10 @@ Just add the following to your ~/.bashrc or run in your current shell</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../dmux/" class="btn btn-neutral float-right" title="Demultiplexing">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../squig/" class="btn btn-neutral float-right" title="Squiggle extras">Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
-        <a href="../barcodes/" class="btn btn-neutral" title="Barcodes"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../split/" class="btn btn-neutral" title="Split fastq"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   
@@ -202,10 +226,10 @@ Just add the following to your ~/.bashrc or run in your current shell</p>
     <span class="rst-current-version" data-toggle="rst-current-version">
       
       
-        <span><a href="../barcodes/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+        <span><a href="../split/" style="color: #fcfcfc;">&laquo; Previous</a></span>
       
       
-        <span style="margin-left: 15px"><a href="../dmux/" style="color: #fcfcfc">Next &raquo;</a></span>
+        <span style="margin-left: 15px"><a href="../squig/" style="color: #fcfcfc">Next &raquo;</a></span>
       
     </span>
 </div>

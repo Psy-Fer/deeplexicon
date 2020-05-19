@@ -8,7 +8,7 @@
   
   
   <link rel="shortcut icon" href="../img/favicon.ico">
-  <title>Installation - deeplexicon Docs</title>
+  <title>Squiggle extras - deeplexicon Docs</title>
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="../css/theme.css" type="text/css" />
@@ -17,8 +17,8 @@
   
   <script>
     // Current page data
-    var mkdocs_page_name = "Installation";
-    var mkdocs_page_input_path = "install.md";
+    var mkdocs_page_name = "Squiggle extras";
+    var mkdocs_page_input_path = "squig.md";
     var mkdocs_page_url = null;
   </script>
   
@@ -58,21 +58,9 @@
     <a class="" href="../barcodes/">Barcodes</a>
 	    </li>
           
-            <li class="toctree-l1 current">
+            <li class="toctree-l1">
 		
-    <a class="current" href="./">Installation</a>
-    <ul class="subnav">
-            
-    <li class="toctree-l2"><a href="#how-to-install-deeplexicon">How to install DeePlexiCon</a></li>
-    
-        <ul>
-        
-            <li><a class="toctree-l3" href="#getting-python37-and-setting-up-environments">Getting python3.7 and setting up environments</a></li>
-        
-        </ul>
-    
-
-    </ul>
+    <a class="" href="../install/">Installation</a>
 	    </li>
           
             <li class="toctree-l1">
@@ -90,9 +78,23 @@
     <a class="" href="../train/">Train a model</a>
 	    </li>
           
-            <li class="toctree-l1">
+            <li class="toctree-l1 current">
 		
-    <a class="" href="../squig/">Squiggle extras</a>
+    <a class="current" href="./">Squiggle extras</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#extra-squiggle-tools">Extra Squiggle tools</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#extract-squggles-from-fast5-files">Extract squggles from fast5 files</a></li>
+        
+            <li><a class="toctree-l3" href="#segment-squiggles-from-squiggletsv">Segment squiggles from squiggle.tsv</a></li>
+        
+        </ul>
+    
+
+    </ul>
 	    </li>
           
             <li class="toctree-l1">
@@ -127,7 +129,7 @@
     
       
     
-    <li>Installation</li>
+    <li>Squiggle extras</li>
     <li class="wy-breadcrumbs-aside">
       
     </li>
@@ -137,35 +139,16 @@
           <div role="main">
             <div class="section">
               
-                <h1 id="how-to-install-deeplexicon">How to install DeePlexiCon</h1>
-<p><strong>DeePlexiCon</strong> is built to work in python 3.7 and is quite sensitive to python versions, as well as library versions such as <code>PyTs</code>.</p>
-<p>Linux is also prefered, and no support for MacOS or Windows will be provided.
-All options excepty <code>train</code> should work on any OS if set up correctly, however we strongly advise using <code>train</code> on Ubuntu.</p>
-<h2 id="getting-python37-and-setting-up-environments">Getting python3.7 and setting up environments</h2>
-<p>Many systems won't have python3.7, so here is how to get it, and create environments with it. (on Ubuntu &lt;=16.04, 3.7 isn't in the default ppa repos)</p>
-<pre><code>sudo add-apt-repository ppa:deadsnakes/ppa
-sudo apt-get update
-sudo apt install python3.7 python3.7-dev python3.7-venv
+                <h1 id="extra-squiggle-tools">Extra Squiggle tools</h1>
+<p>These tools are extensions or modified versions of <a href="link">SquiggleKit</a>.</p>
+<h3 id="extract-squggles-from-fast5-files">Extract squggles from fast5 files</h3>
+<p>Equivalent to <a href="link">SquigglePull</a></p>
+<pre><code>python3 deeplexicon.py squig -p /path/to/fast5s/ &gt; squiggles.tsv
 </code></pre>
-<h4 id="create-environtment">Create environtment</h4>
-<pre><code>python3.7 -m venv ./Deeplexicon/
+<h3 id="segment-squiggles-from-squiggletsv">Segment squiggles from squiggle.tsv</h3>
+<pre><code>python3 deeplexicon.py squig -s squiggle.tsv &gt; segments.tsv
 </code></pre>
-<h4 id="clone-git-repository">clone git repository</h4>
-<pre><code>git clone https://github.com/Psy-Fer/deeplexicon.git
-</code></pre>
-<h4 id="source-and-install-requirements-cpu">source and install requirements (CPU)</h4>
-<p>Keep in mind, these versions are crucial to expected operation.</p>
-<pre><code>source Deeplexicon/bin/activate
-pip install h5py Keras==2.2.4 pandas PyTs==0.8.0 Scikit-learn numba==0.45.0 TensorFlow==1.13.1
-</code></pre>
-<h4 id="done">Done!</h4>
-<p>That's it. To simplify running things, you can add <code>deeplexicon.py</code> to your $PATH
-Just add the following to your ~/.bashrc or run in your current shell</p>
-<pre><code>export PATH="/path/to/deeplexicon:$PATH"
-</code></pre>
-<!-- TODO: add deeplexicon to pip and make executable -->
-
-<!-- TODO: aff tesnorflow-gpu instruction -->
+<!-- TODO: Breakdown of extra options, especially dRNA_segmenter -->
               
             </div>
           </div>
@@ -173,10 +156,10 @@ Just add the following to your ~/.bashrc or run in your current shell</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../dmux/" class="btn btn-neutral float-right" title="Demultiplexing">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../examples/" class="btn btn-neutral float-right" title="Examples">Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
-        <a href="../barcodes/" class="btn btn-neutral" title="Barcodes"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../train/" class="btn btn-neutral" title="Train a model"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   
@@ -202,10 +185,10 @@ Just add the following to your ~/.bashrc or run in your current shell</p>
     <span class="rst-current-version" data-toggle="rst-current-version">
       
       
-        <span><a href="../barcodes/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+        <span><a href="../train/" style="color: #fcfcfc;">&laquo; Previous</a></span>
       
       
-        <span style="margin-left: 15px"><a href="../dmux/" style="color: #fcfcfc">Next &raquo;</a></span>
+        <span style="margin-left: 15px"><a href="../examples/" style="color: #fcfcfc">Next &raquo;</a></span>
       
     </span>
 </div>

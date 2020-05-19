@@ -8,7 +8,7 @@
   
   
   <link rel="shortcut icon" href="../img/favicon.ico">
-  <title>Installation - deeplexicon Docs</title>
+  <title>Demultiplexing - deeplexicon Docs</title>
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="../css/theme.css" type="text/css" />
@@ -17,8 +17,8 @@
   
   <script>
     // Current page data
-    var mkdocs_page_name = "Installation";
-    var mkdocs_page_input_path = "install.md";
+    var mkdocs_page_name = "Demultiplexing";
+    var mkdocs_page_input_path = "dmux.md";
     var mkdocs_page_url = null;
   </script>
   
@@ -58,26 +58,30 @@
     <a class="" href="../barcodes/">Barcodes</a>
 	    </li>
           
+            <li class="toctree-l1">
+		
+    <a class="" href="../install/">Installation</a>
+	    </li>
+          
             <li class="toctree-l1 current">
 		
-    <a class="current" href="./">Installation</a>
+    <a class="current" href="./">Demultiplexing</a>
     <ul class="subnav">
             
-    <li class="toctree-l2"><a href="#how-to-install-deeplexicon">How to install DeePlexiCon</a></li>
+    <li class="toctree-l2"><a href="#how-to-demultiplex-using-deeplexicon">How to DEMULTIPLEX using DeePlexiCon</a></li>
     
         <ul>
         
-            <li><a class="toctree-l3" href="#getting-python37-and-setting-up-environments">Getting python3.7 and setting up environments</a></li>
+            <li><a class="toctree-l3" href="#step-1-predict-barcodes-for-each-read">Step 1: Predict barcodes for each read</a></li>
+        
+            <li><a class="toctree-l3" href="#step-2-split-your-base-called-fastq-data-please-note-that-you-can-filter-your-outputtsv-based-on-confidence-score-if-you-prefer-to-increase-accuracy-at-the-cost-of-recovery">Step 2: Split your base-called fastq data (please note that you can filter your output.tsv based on confidence score if you prefer to increase accuracy at the cost of recovery)</a></li>
+        
+            <li><a class="toctree-l3" href="#notes">Notes</a></li>
         
         </ul>
     
 
     </ul>
-	    </li>
-          
-            <li class="toctree-l1">
-		
-    <a class="" href="../dmux/">Demultiplexing</a>
 	    </li>
           
             <li class="toctree-l1">
@@ -127,7 +131,7 @@
     
       
     
-    <li>Installation</li>
+    <li>Demultiplexing</li>
     <li class="wy-breadcrumbs-aside">
       
     </li>
@@ -137,35 +141,20 @@
           <div role="main">
             <div class="section">
               
-                <h1 id="how-to-install-deeplexicon">How to install DeePlexiCon</h1>
-<p><strong>DeePlexiCon</strong> is built to work in python 3.7 and is quite sensitive to python versions, as well as library versions such as <code>PyTs</code>.</p>
-<p>Linux is also prefered, and no support for MacOS or Windows will be provided.
-All options excepty <code>train</code> should work on any OS if set up correctly, however we strongly advise using <code>train</code> on Ubuntu.</p>
-<h2 id="getting-python37-and-setting-up-environments">Getting python3.7 and setting up environments</h2>
-<p>Many systems won't have python3.7, so here is how to get it, and create environments with it. (on Ubuntu &lt;=16.04, 3.7 isn't in the default ppa repos)</p>
-<pre><code>sudo add-apt-repository ppa:deadsnakes/ppa
-sudo apt-get update
-sudo apt install python3.7 python3.7-dev python3.7-venv
+                <h1 id="how-to-demultiplex-using-deeplexicon">How to DEMULTIPLEX using DeePlexiCon</h1>
+<h3 id="step-1-predict-barcodes-for-each-read">Step 1: Predict barcodes for each read</h3>
+<pre><code>python3 deeplexicon.py dmux -p ~/top/fast5/path/ -f multi -m models/resnet20-final.h5 &gt; output.tsv
 </code></pre>
-<h4 id="create-environtment">Create environtment</h4>
-<pre><code>python3.7 -m venv ./Deeplexicon/
+<h3 id="step-2-split-your-base-called-fastq-data-please-note-that-you-can-filter-your-outputtsv-based-on-confidence-score-if-you-prefer-to-increase-accuracy-at-the-cost-of-recovery">Step 2: Split your base-called fastq data (please note that you can filter your output.tsv based on confidence score if you prefer to increase accuracy at the cost of recovery)</h3>
+<pre><code>python3 deeplexicon.py split -i output.tsv -q combined.fastq -o dmux_folder/ -s sample_name
 </code></pre>
-<h4 id="clone-git-repository">clone git repository</h4>
-<pre><code>git clone https://github.com/Psy-Fer/deeplexicon.git
-</code></pre>
-<h4 id="source-and-install-requirements-cpu">source and install requirements (CPU)</h4>
-<p>Keep in mind, these versions are crucial to expected operation.</p>
-<pre><code>source Deeplexicon/bin/activate
-pip install h5py Keras==2.2.4 pandas PyTs==0.8.0 Scikit-learn numba==0.45.0 TensorFlow==1.13.1
-</code></pre>
-<h4 id="done">Done!</h4>
-<p>That's it. To simplify running things, you can add <code>deeplexicon.py</code> to your $PATH
-Just add the following to your ~/.bashrc or run in your current shell</p>
-<pre><code>export PATH="/path/to/deeplexicon:$PATH"
-</code></pre>
-<!-- TODO: add deeplexicon to pip and make executable -->
-
-<!-- TODO: aff tesnorflow-gpu instruction -->
+<h3 id="notes">Notes</h3>
+<ul>
+<li>Please note, the current algorithm has been trained to demultiplex the 4 barcodes shown above.</li>
+<li>It will not accurately demultiplex reads if different sequences are used.</li>
+<li>Any mix of the 4 currently trained barcodes will still work</li>
+<li>For more barcodes, see training section for more information</li>
+</ul>
               
             </div>
           </div>
@@ -173,10 +162,10 @@ Just add the following to your ~/.bashrc or run in your current shell</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../dmux/" class="btn btn-neutral float-right" title="Demultiplexing">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../split/" class="btn btn-neutral float-right" title="Split fastq">Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
-        <a href="../barcodes/" class="btn btn-neutral" title="Barcodes"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../install/" class="btn btn-neutral" title="Installation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   
@@ -202,10 +191,10 @@ Just add the following to your ~/.bashrc or run in your current shell</p>
     <span class="rst-current-version" data-toggle="rst-current-version">
       
       
-        <span><a href="../barcodes/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+        <span><a href="../install/" style="color: #fcfcfc;">&laquo; Previous</a></span>
       
       
-        <span style="margin-left: 15px"><a href="../dmux/" style="color: #fcfcfc">Next &raquo;</a></span>
+        <span style="margin-left: 15px"><a href="../split/" style="color: #fcfcfc">Next &raquo;</a></span>
       
     </span>
 </div>

@@ -46,11 +46,12 @@ OligoB:
 ## How to DEMULTIPLEX using DeePlexiCon
 
 ### Step 1: Predict barcodes for each read
-    python3 deeplexicon.py -p ~/top/fast5/path/ -f multi -m models/resnet20-final.h5 > output.tsv
+
+    python3 deeplexicon.py dmux -p ~/top/fast5/path/ -f multi -m models/resnet20-final.h5 > output.tsv
 
 ### Step 2: Split your base-called fastq data (please note that you can filter your output.tsv based on confidence score if you prefer to increase accuracy at the cost of recovery)
 
-    python3 fastq_splitter.py -d output.tsv -q combined.fastq -o dmux_folder/ -s sample_name
+    python3 deeplexicon.py split -i output.tsv -q combined.fastq -o dmux_folder/ -s sample_name
 
 ### Notes
 Please note, the current algorithm has been trained to demultiplex the 4 barcodes shown above. It will not accurately demultiplex reads if different sequences are used.
@@ -58,10 +59,14 @@ Please note, the current algorithm has been trained to demultiplex the 4 barcode
 ----
 ## How to TRAIN DeePlexiCon with different barcodes
 
-Coming soon
+    python deeplexicon.py train --path /fast5/top/path/ --train_truth train.tsv --test_truth test.tsv -- val_truth val.tsv
 
 ----
 ## Getting help with DeePlexiCon
 
-If you have any troubles using DeePlexiCon, you can leave an [issue](https://github.com/Psy-Fer/deeplexicon/issues) in the [github repo](https://github.com/Psy-Fer/deeplexicon) of DeePlexiCon.
+If you have any troubles using DeePlexiCon, please leave an [issue](https://github.com/Psy-Fer/deeplexicon/issues) in the [github repo](https://github.com/Psy-Fer/deeplexicon) of DeePlexiCon.
 
+
+## Citing this work
+
+Martin A. Smith, Tansel Ersavas, James M. Ferguson, Huanle Liu, Morghan C. Lucas, Oguzhan Begik, Lilly Bojarski, Kirston Barton, Eva Maria Novoa. Barcoding and demultiplexing Oxford Nanopore direct RNA sequencing reads with deep residual learning. bioRxiv 2019

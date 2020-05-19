@@ -1,7 +1,12 @@
 site_name: deeplexicon Docs
 nav:
     - Home: index.md
+    - Barcodes: barcodes.md
     - Installation: install.md
+    - Demultiplexing: dmux.md
+    - Split fastq: split.md
+    - Train a model: train.md
+    - Squiggle extras: squig.md
     - Examples: examples.md
     - Troubleshooting: troubleshooting.md
 theme: readthedocs

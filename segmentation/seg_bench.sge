@@ -1,0 +1,23 @@
+#!/bin/bash
+#$ -cwd
+#$ -N dpc_seg
+#$ -S /bin/bash
+#$ -b y
+#$ -j y
+#$ -l mem_requested=5G
+#$ -l h_vmem=5G
+#$ -l tmp_requested=5G
+#$ -pe smp 1
+#$ -o /dev/null
+#$ -e /dev/null
+
+
+# 1=input split folder
+# 2=output dir
+
+READS=$(find ${1} -type f -name "x*" | sed -n ${SGE_TASK_ID}p)
+
+
+source ~/work/venv363/bin/activate
+
+python B_bench_array.py -s ${READS} > ${2}/seg_out_${SGE_TASK_ID}.tsv

@@ -16,25 +16,25 @@ import traceback
 import math
 import numpy as np
 # from PIL import Image
-# import pyts
-# from pyts.image import MarkovTransitionField, GramianAngularField, RecurrencePlot
-# import tensorflow as tf
-# import keras
-# from keras.layers import Dense, Conv2D, BatchNormalization, Activation
-# from keras.layers import AveragePooling2D, Input, Flatten
-# from keras.optimizers import Adam
-# from keras.callbacks import ModelCheckpoint, LearningRateScheduler
-# from keras.callbacks import ReduceLROnPlateau
-# from keras.preprocessing.image import ImageDataGenerator
-# from keras.utils import multi_gpu_model
-# from keras.regularizers import l2
-# from keras import backend as K
-# from keras.models import Model
-# import pandas as pd
-# from sklearn import datasets, linear_model
-# from sklearn.model_selection import train_test_split
-# from tensorflow.python.client import device_lib
-# from keras.models import load_model
+import pyts
+from pyts.image import MarkovTransitionField, GramianAngularField, RecurrencePlot
+import tensorflow as tf
+import keras
+from keras.layers import Dense, Conv2D, BatchNormalization, Activation
+from keras.layers import AveragePooling2D, Input, Flatten
+from keras.optimizers import Adam
+from keras.callbacks import ModelCheckpoint, LearningRateScheduler
+from keras.callbacks import ReduceLROnPlateau
+from keras.preprocessing.image import ImageDataGenerator
+from keras.utils import multi_gpu_model
+from keras.regularizers import l2
+from keras import backend as K
+from keras.models import Model
+import pandas as pd
+from sklearn import datasets, linear_model
+from sklearn.model_selection import train_test_split
+from tensorflow.python.client import device_lib
+from keras.models import load_model
 
 
 '''
@@ -216,6 +216,8 @@ def main():
                         help="Network version to use (see table in docs)")
     train.add_argument('-e', '--epochs', type=int, default=40,
                         help="epochs to run")
+    train.add_argument('-x', '--prefix', default="model",
+                        help="prefix used to name model")
     train.add_argument('-v', '--verbose', action='count', default=0,
                         help="Verbose output [v/vv/vvv]")
 
@@ -252,52 +254,22 @@ def main():
     # Ensure non-command use is exited before this point
     # Perfect time to do arg checks before pipeline calls
     if args.command == "dmux":
-        import pyts
-        from pyts.image import MarkovTransitionField, GramianAngularField, RecurrencePlot
-        import tensorflow as tf
-        import keras
-        from keras.layers import Dense, Conv2D, BatchNormalization, Activation
-        from keras.layers import AveragePooling2D, Input, Flatten
-        from keras.optimizers import Adam
-        from keras.callbacks import ModelCheckpoint, LearningRateScheduler
-        from keras.callbacks import ReduceLROnPlateau
-        from keras.preprocessing.image import ImageDataGenerator
-        from keras.utils import multi_gpu_model
-        from keras.regularizers import l2
-        from keras import backend as K
-        from keras.models import Model
-        import pandas as pd
-        from sklearn import datasets, linear_model
-        from sklearn.model_selection import train_test_split
-        from tensorflow.python.client import device_lib
-        from keras.models import load_model
-
         dmux_pipeline(args)
     elif args.command == "split":
         split_pipeline(args)
     elif args.command == "train":
 
-        import pyts
-        from pyts.image import MarkovTransitionField, GramianAngularField, RecurrencePlot
-        import tensorflow as tf
-        import keras
-        from keras.layers import Dense, Conv2D, BatchNormalization, Activation
-        from keras.layers import AveragePooling2D, Input, Flatten
-        from keras.optimizers import Adam
-        from keras.callbacks import ModelCheckpoint, LearningRateScheduler
-        from keras.callbacks import ReduceLROnPlateau
-        from keras.preprocessing.image import ImageDataGenerator
-        from keras.utils import multi_gpu_model
-        from keras.regularizers import l2
-        from keras import backend as K
-        from keras.models import Model
-        import pandas as pd
-        from sklearn import datasets, linear_model
-        from sklearn.model_selection import train_test_split
-        from tensorflow.python.client import device_lib
-        from keras.models import load_model
+        def get_available_gpus():
+            local_device_protos = device_lib.list_local_devices()
+            return [x.name for x in local_device_protos if x.device_type == 'GPU']
 
-        print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
+        gpu_list = get_available_gpus()
+        if len(gpu_list) < 1:
+            print("No GPU detected. Please ensure CUDA and cuDNN are set up")
+            sys.exit(1)
+        print("Num GPUs Available: ", len(gpu_list))
+        print("Only single GPU mode available, using device: {}".format(gpu_list[0]))
+
         train_pipeline(args)
     elif args.command == "squig":
         squig_pipeline(args)
@@ -541,13 +513,13 @@ def get_single_fast5_signal(read_filename, w, squig_file, seg_file):
     return readID, pA_signal[seg[0]:seg[1]]
 
 
-def get_multi_fast5_signal(read_filename, w, squig_file, seg_file):
+def get_multi_fast5_signal(read_filename, w, squig_file, seg_file, train=False):
     '''
     open multi fast5 files and extract information
     '''
     pA_signals = {}
     seg_dic = {}
-    f5_dic = read_multi_fast5(read_filename)
+    f5_dic = read_multi_fast5(read_filename, reads=train)
     seg = 0
     sig_count = 0
     for read in f5_dic:
@@ -611,16 +583,20 @@ def read_single_fast5(filename):
     return f5_dic
 
 
-def read_multi_fast5(filename):
+def read_multi_fast5(filename, reads=False):
     '''
     read multifast5 file and return data
     '''
     f5_dic = {}
     with h5py.File(filename, 'r') as hdf:
         for read in list(hdf.keys()):
-            f5_dic[read] = {'signal': [], 'readID': '', 'digitisation': 0.0,
-                            'offset': 0.0, 'range': 0.0, 'sampling_rate': 0.0}
             try:
+                if reads:
+                    if hdf[read]['Raw'].attrs['read_id'].decode() not in reads:
+                        continue
+                f5_dic[read] = {'signal': [], 'readID': '', 'digitisation': 0.0,
+                'offset': 0.0, 'range': 0.0, 'sampling_rate': 0.0}
+                
                 f5_dic[read]['signal'] = hdf[read]['Raw/Signal'][()]
                 f5_dic[read]['readID'] = hdf[read]['Raw'].attrs['read_id'].decode()
                 f5_dic[read]['digitisation'] = hdf[read]['channel_id'].attrs['digitisation']
@@ -1143,8 +1119,8 @@ def train_pipeline(args):
             model = resnet_v1(input_shape=input_shape, depth=depth)
         model.summary()
         #    plot_model(model, to_file='model_plot.svg', show_shapes=True, show_layer_names=True)
-        if gpus>1:
-            model = multi_gpu_model(model, gpus=gpus, cpu_merge=False)
+        # if gpus>1:
+        #     model = multi_gpu_model(model, gpus=gpus, cpu_merge=False)
         model.compile(loss='categorical_crossentropy',
                       optimizer=Adam(lr=lr_schedule(0)),
                       metrics=['accuracy'])
@@ -1255,9 +1231,9 @@ def train_pipeline(args):
                 l = l.strip("\n")
                 l = l.split("\t")
                 if len(l) < 3:
-                    l = l.split(",")
+                    l = l[0].split(",")
                 readID = l[0]
-                train_truth_dic[readID] = np.array([int(i) for i in l[1:]], dtype=int)
+                train_truth_dic[readID] = np.array([float(i) for i in l[1:]], dtype=float)
     train_readIDs = set(train_truth_dic.keys())
 
     test_truth_dic = {}
@@ -1267,12 +1243,12 @@ def train_pipeline(args):
                 l = l.strip("\n")
                 l = l.split("\t")
                 if len(l) < 3:
-                    l = l.split(",")
+                    l = l[0].split(",")
                 readID = l[0]
-                test_truth_dic[readID] = np.array([int(i) for i in l[1:]], dtype=int)
+                test_truth_dic[readID] = np.array([float(i) for i in l[1:]], dtype=float)
     test_readIDs = set(test_truth_dic.keys())
 
-    if agrs.val_truth:
+    if args.val_truth:
         val_truth_dic = {}
         for val_file in args.val_truth:
             with open(val_file, 'rt') as tt:
@@ -1280,25 +1256,40 @@ def train_pipeline(args):
                     l = l.strip("\n")
                     l = l.split("\t")
                     if len(l) < 3:
-                        l = l.split(",")
+                        l = l[0].split(",")
                     readID = l[0]
-                    val_truth_dic[readID] = np.array([int(i) for i in l[1:]], dtype=int)
+                    val_truth_dic[readID] = np.array([float(i) for i in l[1:]], dtype=float)
         val_readIDs = set(val_truth_dic.keys())
 
+    all_reads = set()
+    all_reads.update(train_readIDs)
+    all_reads.update(test_readIDs)
+    all_reads.update(val_readIDs)
+    print(all_reads)
     # read fast5s and convert them to images
     labels = []
     images = []
     fast5s = {}
     seg_dic = {}
-    for p in train.path:
+    train_labels = []
+    train_images = []
+    train_fast5s = {}
+    test_labels = []
+    test_images = []
+    test_fast5s = {}
+    val_labels = []
+    val_images = []
+    val_fast5s = {}
+    train_count = 0
+    test_count = 0
+    val_count = 0
+    for p in args.path:
         for dirpath, dirnames, files in os.walk(p):
             for fast5 in files:
                 if fast5.endswith('.fast5'):
                     fast5_file = os.path.join(dirpath, fast5)
-                    seg_signal = get_multi_fast5_signal(fast5_file, window, False, False)
-                    train_count = 0
-                    test_count = 0
-                    val_count = 0
+                    print(fast5)
+                    seg_signal = get_multi_fast5_signal(fast5_file, window, False, False, train=all_reads)
                     for readID in seg_signal:
                         if readID in train_readIDs:
                             img = convert_to_image(np.array(seg_signal[readID], dtype=float))
@@ -1321,10 +1312,16 @@ def train_pipeline(args):
 
                         else:
                             continue
+                    if len(train_labels) > 1:
+                        print(test_labels, train_count, test_count, val_count)
+                        sys.exit(1)
 
 
-    ret=train_model(args.prefix, args.network, args.net_version, args.epochs,  train_images, train_labels, test_images, test_labels,
-               gpus=gpus,per_gpu_batch_size=16)
+
+    gpus = 1
+    ret=train_model(args.prefix, args.network, args.net_version, args.epochs,
+                    train_images, train_labels, test_images, test_labels,
+                    gpus=gpus,per_gpu_batch_size=16)
 
     print(ret)
     # tie verbose to --verbose?

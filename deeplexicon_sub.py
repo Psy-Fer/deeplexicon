@@ -280,20 +280,20 @@ def main():
 
     # done!
 
-    # TODO: sub-module
-    if args.squiggle:
-        squig_file = args.squiggle
-        with open(squig_file, 'a') as f:
-            f.write("{}\t{}\n".format("ReadID", "signal_pA"))
-    else:
-        squig_file = ''
-    # TODO: sub-module
-    if args.segment:
-        seg_file = args.segment
-        with open(seg_file, 'a') as f:
-            f.write("{}\t{}\t{}\n".format("ReadID", "start", "stop"))
-    else:
-        seg_file = ""
+    # # TODO: sub-module
+    # if args.squiggle:
+    #     squig_file = args.squiggle
+    #     with open(squig_file, 'a') as f:
+    #         f.write("{}\t{}\n".format("ReadID", "signal_pA"))
+    # else:
+    #     squig_file = ''
+    # # TODO: sub-module
+    # if args.segment:
+    #     seg_file = args.segment
+    #     with open(seg_file, 'a') as f:
+    #         f.write("{}\t{}\t{}\n".format("ReadID", "start", "stop"))
+    # else:
+    #     seg_file = ""
 
     # Globals
     # TODO: sub-module
@@ -596,7 +596,7 @@ def read_multi_fast5(filename, reads=False):
                         continue
                 f5_dic[read] = {'signal': [], 'readID': '', 'digitisation': 0.0,
                 'offset': 0.0, 'range': 0.0, 'sampling_rate': 0.0}
-                
+
                 f5_dic[read]['signal'] = hdf[read]['Raw/Signal'][()]
                 f5_dic[read]['readID'] = hdf[read]['Raw'].attrs['read_id'].decode()
                 f5_dic[read]['digitisation'] = hdf[read]['channel_id'].attrs['digitisation']
@@ -1099,7 +1099,8 @@ def train_pipeline(args):
         return model
 
     def train_model(run_name, net_type,version,  epochs,  x_train, y_train, x_test, y_test,
-               gpus=1,per_gpu_batch_size=16,tensorboard_output=None, data_augmentation = False, subtract_pixel_mean = False, verbose=0):
+               gpus=1,per_gpu_batch_size=16,tensorboard_output=None, data_augmentation = False,
+               subtract_pixel_mean = False, verbose=0, x_val=False, y_val=False):
 
         batch_size=per_gpu_batch_size*gpus  # multiply by number of GPUs
 
@@ -1215,6 +1216,10 @@ def train_pipeline(args):
                                 epochs=epochs, verbose=verbose, workers=4,
                                 steps_per_epoch=batch_size,
                                 callbacks=callbacks)
+        if x_val is not False:
+            scores = model.evaluate(x_val, y_val, verbose=1)
+            print('Validation loss: {} accuracy: {}'.format(scores[0], scores[1]))
+
         return(history)
 
 
@@ -1265,7 +1270,6 @@ def train_pipeline(args):
     all_reads.update(train_readIDs)
     all_reads.update(test_readIDs)
     all_reads.update(val_readIDs)
-    print(all_reads)
     # read fast5s and convert them to images
     labels = []
     images = []
@@ -1312,25 +1316,23 @@ def train_pipeline(args):
 
                         else:
                             continue
-                    if len(train_labels) > 1:
-                        print(test_labels, train_count, test_count, val_count)
-                        sys.exit(1)
-
-
 
     gpus = 1
-    ret=train_model(args.prefix, args.network, args.net_version, args.epochs,
-                    train_images, train_labels, test_images, test_labels,
-                    gpus=gpus,per_gpu_batch_size=16)
-
-    print(ret)
-    # tie verbose to --verbose?
+    batch_control = 8
     if args.val_truth:
-        scores = model.evaluate(val_images, val_labels, verbose=1)
-        print('Validation loss: {} accuracy: {}'.format(scores[0], scores[1]))
+        ret=train_model(args.prefix, args.network, args.net_version, args.epochs,
+                        np.array(train_images), np.array(train_labels),
+                        np.array(test_images), np.array(test_labels),
+                        gpus=gpus,per_gpu_batch_size=batch_control,
+                        x_val=np.array(val_images), y_val=np.array(val_labels))
+    else:
+        ret=train_model(args.prefix, args.network, args.net_version, args.epochs,
+                        np.array(train_images), np.array(train_labels),
+                        np.array(test_images), np.array(test_labels),
+                        gpus=gpus,per_gpu_batch_size=batch_control)
+
 
     return
-
 
 
 def squig_pipeline(args):

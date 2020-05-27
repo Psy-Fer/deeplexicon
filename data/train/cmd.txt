@@ -1,0 +1,1 @@
+python deeplexicon_sub.py train -p fast5s/ -t train_6400.csv -s test_800.csv -u val_800.csv -x test

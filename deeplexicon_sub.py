@@ -171,6 +171,8 @@ def main():
                         help="probability threshold - 0.5 hi accuracy / 0.3 hi recovery")
     dmux.add_argument("-m", "--model",
                         help="Trained model name to use")
+    dmux.add_argument("-g", "--gpu", action="store_true",
+                        help="Use GPU if available")
     dmux.add_argument("--squiggle", default=False,
                         help="dump squiggle data into this .tsv file")
     dmux.add_argument("--segment", default=False,
@@ -216,6 +218,8 @@ def main():
                         help="Network version to use (see table in docs)")
     train.add_argument('-e', '--epochs', type=int, default=40,
                         help="epochs to run")
+    train.add_argument('-b', '--batch_size', type=int, default=8,
+                        help="Controls how much data is loaded into the GPU at a time. ~8 for 4GB cards, ~16 for >8GB")
     train.add_argument('-x', '--prefix', default="model",
                         help="prefix used to name model")
     train.add_argument('-v', '--verbose', action='count', default=0,
@@ -246,14 +250,26 @@ def main():
         print_verbose("DeePlexiCon: {}".format(VERSION))
         print_verbose("arg list: {}".format(args))
         if tf.test.gpu_device_name():
-            print_verbose('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
+            print_verbose("GPU detected!!!")
+            print_verbose("Default GPU Device: {}"".format(tf.test.gpu_device_name()))
         else:
-            print_verbose("Please install GPU version of TF")
+            print_verbose("Please install GPU version of TF:")
+            print_verbose("> pip3 uninstall tensorflow")
+            print_verbose("> pip3 install tensorflow-gpu=1.13.1")
 
 
     # Ensure non-command use is exited before this point
     # Perfect time to do arg checks before pipeline calls
     if args.command == "dmux":
+        if args.gpu:
+            if tf.test.gpu_device_name():
+                print_verbose("GPU detected!!!")
+                print_verbose("Default GPU Device: {}"".format(tf.test.gpu_device_name()))
+            else:
+                print_verbose("GPU not detected, please ensure Drivers/CUDA/cuDNN/tf-gpu are set up properly")
+                print_verbose("Continuing with CPU")
+                args.gpu = False
+
         dmux_pipeline(args)
     elif args.command == "split":
         split_pipeline(args)
@@ -271,6 +287,7 @@ def main():
         print("Only single GPU mode available, using device: {}".format(gpu_list[0]))
 
         train_pipeline(args)
+        print("Training complete, models available in ./saved_models/")
     elif args.command == "squig":
         squig_pipeline(args)
     else:
@@ -1316,9 +1333,12 @@ def train_pipeline(args):
 
                         else:
                             continue
-
+    # TODO: Multi-gpu support
     gpus = 1
-    batch_control = 8
+    batch_control = args.batch_size
+
+    # Run validation check after training
+    # TODO: Run after each epoch
     if args.val_truth:
         ret=train_model(args.prefix, args.network, args.net_version, args.epochs,
                         np.array(train_images), np.array(train_labels),

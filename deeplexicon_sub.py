@@ -172,12 +172,12 @@ def main():
     dmux.add_argument("-m", "--model",
                         help="Trained model name to use")
     dmux.add_argument("-g", "--gpu", action="store_true",
-                        help="Use GPU if available")
+                        help="Use GPU if available - experimental")
     dmux.add_argument("--squiggle", default=False,
                         help="dump squiggle data into this .tsv file")
     dmux.add_argument("--segment", default=False,
                         help="dump segment data into this .tsv file")
-    dmux.add_argument("-b", "--batch_size", type=int, default=4000,
+    dmux.add_argument("-b", "--batch_size", type=int, default=1000,
                         help="batch size - for single fast5s")
     dmux.add_argument('-v', '--verbose', action='count', default=0,
                         help="Verbose output [v/vv/vvv]")
@@ -251,7 +251,7 @@ def main():
         print_verbose("arg list: {}".format(args))
         if tf.test.gpu_device_name():
             print_verbose("GPU detected!!!")
-            print_verbose("Default GPU Device: {}"".format(tf.test.gpu_device_name()))
+            print_verbose("Default GPU Device: {}".format(tf.test.gpu_device_name()))
         else:
             print_verbose("Please install GPU version of TF:")
             print_verbose("> pip3 uninstall tensorflow")
@@ -264,7 +264,7 @@ def main():
         if args.gpu:
             if tf.test.gpu_device_name():
                 print_verbose("GPU detected!!!")
-                print_verbose("Default GPU Device: {}"".format(tf.test.gpu_device_name()))
+                print_verbose("Default GPU Device: {}".format(tf.test.gpu_device_name()))
             else:
                 print_verbose("GPU not detected, please ensure Drivers/CUDA/cuDNN/tf-gpu are set up properly")
                 print_verbose("Continuing with CPU")
@@ -298,19 +298,7 @@ def main():
     # done!
 
     # # TODO: sub-module
-    # if args.squiggle:
-    #     squig_file = args.squiggle
-    #     with open(squig_file, 'a') as f:
-    #         f.write("{}\t{}\n".format("ReadID", "signal_pA"))
-    # else:
-    #     squig_file = ''
-    # # TODO: sub-module
-    # if args.segment:
-    #     seg_file = args.segment
-    #     with open(seg_file, 'a') as f:
-    #         f.write("{}\t{}\t{}\n".format("ReadID", "start", "stop"))
-    # else:
-    #     seg_file = ""
+
 
     # Globals
     # TODO: sub-module
@@ -349,56 +337,43 @@ def dmux_pipeline(args):
     fast5s = {}
     stats = ""
     seg_dic = {}
+    if args.squiggle:
+        squig_file = args.squiggle
+        with open(squig_file, 'a') as f:
+            f.write("{}\t{}\n".format("ReadID", "signal_pA"))
+    else:
+        squig_file = ''
+    # TODO: sub-module
+    if args.segment:
+        seg_file = args.segment
+        with open(seg_file, 'a') as f:
+            f.write("{}\t{}\t{}\n".format("ReadID", "start", "stop"))
+    else:
+        seg_file = ""
     print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format("fast5", "ReadID", "Barcode", "Confidence Interval", "P_bc_1", "P_bc_2", "P_bc_3", "P_bc_4"))
     # for file in input...
     # TODO: sub-module
-    for dirpath, dirnames, files in os.walk(dmux.path):
-        for fast5 in files:
-            if fast5.endswith('.fast5'):
-                fast5_file = os.path.join(dirpath, fast5)
-                if args.form == "single":
-                    #everthing below this, send off in batches of N=args.batch_size
-                    # The signal extraction and segmentation can happen in the first step
-                    # read fast5 files
-                    readID, seg_signal = get_single_fast5_signal(fast5_file, window, squig_file, seg_file)
-                    if not seg_signal:
-                        print_err("Segment not found for:\t{}\t{}".format(fast5_file, readID))
-                        continue
-                    # convert
-                    sig = np.array(seg_signal, dtype=float)
-                    img = convert_to_image(sig)
-                    labels.append(readID)
-                    fast5s[readID] = fast5
-                    images.append(img)
-                    # classify
-                    if len(labels) >= args.batch_size:
-                        C = classify(model, labels, np.array(images), False, args.threshold)
-                        # save to output
-                        for readID, out, c, P in C:
-                            prob = [round(float(i), 6) for i in P]
-                            cm = round(float(c), 4)
-                            if args.verbose:
-                                print_verbose("cm is: {}".format(cm))
-                            print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, prob[0], prob[1], prob[2], prob[3]))
-                        labels = []
-                        images = []
-                        fast5s = {}
-
-                # TODO: sub-module
-                elif args.form == "multi":
-                    #everthing below this, send off in batches of N=args.batch_size
-                    # The signal extraction and segmentation can happen in the first step
-                    # read fast5 files
-                    seg_signal = get_multi_fast5_signal(fast5_file, window, squig_file, seg_file)
-                    sig_count = 0
-                    for readID in seg_signal:
+    for path in args.path:
+        for dirpath, dirnames, files in os.walk(path):
+            for fast5 in files:
+                if fast5.endswith('.fast5'):
+                    fast5_file = os.path.join(dirpath, fast5)
+                    if args.form == "single":
+                        #everthing below this, send off in batches of N=args.batch_size
+                        # The signal extraction and segmentation can happen in the first step
+                        # read fast5 files
+                        # make generator to speed up real time results
+                        readID, seg_signal = get_single_fast5_signal(fast5_file, window, squig_file, seg_file)
+                        if not seg_signal:
+                            print_err("Segment not found for:\t{}\t{}".format(fast5_file, readID))
+                            continue
                         # convert
-                        img = convert_to_image(np.array(seg_signal[readID], dtype=float))
+                        sig = np.array(seg_signal, dtype=float)
+                        img = convert_to_image(sig)
                         labels.append(readID)
-                        images.append(img)
                         fast5s[readID] = fast5
-                        sig_count += 1
-                        # TODO: sub-module
+                        images.append(img)
+                        # classify
                         if len(labels) >= args.batch_size:
                             C = classify(model, labels, np.array(images), False, args.threshold)
                             # save to output
@@ -407,27 +382,55 @@ def dmux_pipeline(args):
                                 cm = round(float(c), 4)
                                 if args.verbose:
                                     print_verbose("cm is: {}".format(cm))
-                                print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcde_out[out], cm, prob[0], prob[1], prob[2], prob[3]))
+                                print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, prob[0], prob[1], prob[2], prob[3]))
                             labels = []
                             images = []
                             fast5s = {}
-                        elif args.verbose:
-                            print_verbose("analysing sig_count: {}/{}".format(sig_count, len(seg_signal)))
-                        else:
-                            blah = 0 # clean
-    #finish up
-    # TODO: sub-module
-    C = classify(model, labels, np.array(images), False, args.threshold)
-    # save to output
-    for readID, out, c, P in C:
-        prob = [round(float(i), 6) for i in P]
-        cm = round(float(c), 4)
-        if args.verbose:
-            print_verbose("cm is: {}".format(cm))
-        print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, prob[0], prob[1], prob[2], prob[3]))
-    labels = []
-    images = []
-    fast5s = {}
+
+                    # TODO: sub-module
+                    elif args.form == "multi":
+                        #everthing below this, send off in batches of N=args.batch_size
+                        # The signal extraction and segmentation can happen in the first step
+                        # read fast5 files
+                        seg_signal = get_multi_fast5_signal(fast5_file, window, squig_file, seg_file)
+                        sig_count = 0
+                        for readID in seg_signal:
+                            # convert
+                            img = convert_to_image(np.array(seg_signal[readID], dtype=float))
+                            labels.append(readID)
+                            images.append(img)
+                            fast5s[readID] = fast5
+                            sig_count += 1
+                            # TODO: sub-module
+                            if len(labels) >= args.batch_size:
+                                C = classify(model, labels, np.array(images), False, args.threshold)
+                                # save to output
+                                for readID, out, c, P in C:
+                                    prob = [round(float(i), 6) for i in P]
+                                    cm = round(float(c), 4)
+                                    if args.verbose:
+                                        print_verbose("cm is: {}".format(cm))
+                                    print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, prob[0], prob[1], prob[2], prob[3]))
+                                labels = []
+                                images = []
+                                fast5s = {}
+                            elif args.verbose:
+                                print_verbose("analysing sig_count: {}/{}".format(sig_count, len(seg_signal)))
+                            else:
+                                blah = 0 # clean
+        #finish up
+        # TODO: sub-module
+        C = classify(model, labels, np.array(images), False, args.threshold)
+        # save to output
+        for readID, out, c, P in C:
+            prob = [round(float(i), 6) for i in P]
+            cm = round(float(c), 4)
+            if args.verbose:
+                print_verbose("cm is: {}".format(cm))
+            print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, prob[0], prob[1], prob[2], prob[3]))
+        labels = []
+        images = []
+        fast5s = {}
 
 
     # final report/stats

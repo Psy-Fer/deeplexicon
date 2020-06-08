@@ -9,4 +9,5 @@ nav:
     - Squiggle extras: squig.md
     - Examples: examples.md
     - Troubleshooting: troubleshooting.md
+    - Cuda/cuDNN/TF setup: cuda.md
 theme: readthedocs

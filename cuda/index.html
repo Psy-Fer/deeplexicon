@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Cuda/cuDNN/TF setup - deeplexicon Docs</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Cuda/cuDNN/TF setup";
+    var mkdocs_page_input_path = "cuda.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> deeplexicon Docs</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="..">Home</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../barcodes/">Barcodes</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../install/">Installation</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../dmux/">Demultiplexing</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../split/">Split fastq</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../train/">Train a model</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../squig/">Squiggle extras</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../examples/">Examples</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../troubleshooting/">Troubleshooting</a>
+	    </li>
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">Cuda/cuDNN/TF setup</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#setting-up-training-environmnet">Setting up training environmnet</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#requirements-recommended-minimum">Requirements (recommended minimum)</a></li>
+        
+            <li><a class="toctree-l3" href="#requirements-notes">Requirements notes</a></li>
+        
+            <li><a class="toctree-l3" href="#installupdate-nvidia-drivers">Install/update NVIDIA drivers</a></li>
+        
+            <li><a class="toctree-l3" href="#installing-cuda-100">Installing CUDA 10.0</a></li>
+        
+        </ul>
+    
+
+    </ul>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">deeplexicon Docs</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Cuda/cuDNN/TF setup</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="setting-up-training-environmnet">Setting up training environmnet</h1>
+<p>Setting up your environment for training is a rather difficult task given the multitude of caveates associated with various operating systems, versions, and hardware.</p>
+<p>This guide, is to give as clear and simple instructions as possible that should be translatable to most "current" versions of Ubuntu (16/18/20).04 LTS.</p>
+<p>By checking compatibility and ensuring to download the appropriate files for your setup, this should be achievable without stuffing the graphics drivers too much.</p>
+<p><strong>WARNING!!!</strong></p>
+<p>However, on that note, I have to give the obligatory <strong>WARNING!!!</strong>
+This is a guide only, and you are ultimately responsible for what you do to your system.
+We take no responsibility for any damage or system instability caused.</p>
+<p><strong>WARNING!!!</strong></p>
+<p>So, first thing first...</p>
+<h2 id="requirements-recommended-minimum">Requirements (recommended minimum)</h2>
+<ul>
+<li>Ubuntu (18.04 LTS)</li>
+<li>sudo access</li>
+<li>RAM (16GB, more recommended)</li>
+<li>NVIDIA Graphics card with CUDA cores (4gb or more)</li>
+<li>NVIDIA drivers (440 - or something with CUDA 10.0 or higher)</li>
+<li>CUDA 10.0</li>
+<li>cuDNN 7.4.2</li>
+<li>tensorflow-gpu==1.13.1</li>
+</ul>
+<h2 id="requirements-notes">Requirements notes</h2>
+<p>Graphics cards with more memory will be able to use a larget batch size. Batch size is a measure of how many images (reads) are parsed to the GPU at a time, thus a larger batch size = faster training.</p>
+<p>A GTX/RTX or NVIDIA card with CUDA cores (TITAN/TESLA/etc) is needed here. AMD/ATI will not work.</p>
+<p>We have used GTX1080Ti(4gb) and TESLA V100 (16GB).</p>
+<p>Multi-GPU is not supported with the command line interface.</p>
+<p>Graphics drivers are backward, but not forward compatible. So when you run <code>nvidia-smi</code>, as long as "CUDA Version" is higher than 10.0, we should be fine (for now at least Q1 2020)</p>
+<p>CUDA, cuDNN, and tensorflow are all coupled by versions.</p>
+<p>Please use the versions mentioned unless you know what you are doing.</p>
+<p>Refer <a href="https://www.tensorflow.org/install/source#linux">here</a> for more info on version compatibility</p>
+<p>Tensorflow 1.13.1 was used because of a backend keras issue that impacted multi-gpu training back when DeePlexiCon was being developed.</p>
+<p>We will eventually move everything to TensorFlow 2.0 (where this has been fixed) when there is a major retraining or chemistry update.</p>
+<p>If you get stuck in a boot loop, or can't boot the machine anymore/get black screens, boot into the GRUB bootloader, start a root shell, remove NVIDIA drivers, and re-install them. (details provided bellow)</p>
+<h2 id="installupdate-nvidia-drivers">Install/update NVIDIA drivers</h2>
+<p><strong>WARNING</strong></p>
+<p>This is probably the most volatile step. Please proceed with caution.</p>
+<p>Note, here <code>nvidia-440</code> is for the driver version 440. Check compatibility <a href="https://www.nvidia.com/en-us/drivers/unix/">here</a></p>
+<h3 id="step-1">Step 1</h3>
+<h4 id="method-1">Method 1</h4>
+<pre><code>sudo add-apt-repository ppa:graphics-drivers/ppa
+sudo apt-get update
+sudo apt install nvidia-440
+</code></pre>
+<h4 id="method-2">Method 2</h4>
+<p>See devices and available versions:</p>
+<pre><code>sudo ubuntu-drivers devices
+</code></pre>
+<p>I see this:</p>
+<pre><code>vendor   : NVIDIA Corporation
+model    : GP107M [GeForce GTX 1050 Ti Mobile]
+driver   : nvidia-driver-435 - distro non-free
+driver   : nvidia-driver-440 - third-party free recommended
+driver   : nvidia-driver-390 - distro non-free
+driver   : xserver-xorg-video-nouveau - distro free builtin
+</code></pre>
+<p>Then run</p>
+<pre><code>sudo ubuntu-drivers nvidia-driver-440
+</code></pre>
+<h3 id="step-2">Step 2</h3>
+<p>Now reboot</p>
+<h3 id="step-3">Step 3</h3>
+<p>Check the drivers installed properly</p>
+<pre><code>nvidia-smi
+</code></pre>
+<p>You should see something like this</p>
+<pre><code>Fri May 29 03:29:58 2020       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 440.64.00    Driver Version: 440.64.00    CUDA Version: 10.2     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|===============================+======================+======================|
+|   0  GeForce GTX 105...  On   | 00000000:01:00.0 Off |                  N/A |
+| N/A   45C    P8    N/A /  N/A |   1077MiB /  4040MiB |      0%      Default |
++-------------------------------+----------------------+----------------------+
+
++-----------------------------------------------------------------------------+
+| Processes:                                                       GPU Memory |
+|  GPU       PID   Type   Process name                             Usage      |
+|=============================================================================|
+|    0      1320      G   /usr/lib/xorg/Xorg                            47MiB |
+|    0      1628      G   /usr/bin/gnome-shell                          47MiB |
+|    0      2702      G   /usr/lib/xorg/Xorg                           299MiB |
+|    0      2873      G   /usr/bin/gnome-shell                         214MiB |
++-----------------------------------------------------------------------------+
+</code></pre>
+<h4 id="if-you-are-getting-a-boot-loop-or-black-screencrashes-after-reboot">If you are getting a boot loop or black screen/crashes after reboot</h4>
+<p>Get into the GRUB bootloader. See <a href="https://askubuntu.com/questions/16042/how-to-get-to-the-grub-menu-at-boot-time">here</a> for a few ways to do that.</p>
+<p>Drop into a root shell with internet access. You can do this in the advanced options. See <a href="https://askubuntu.com/questions/92556/how-do-i-boot-into-a-root-shell">here</a> for more info</p>
+<p>Remove all nvidia packages</p>
+<pre><code>sudo apt-get purge nvidia*
+</code></pre>
+<p>Ensure the ppa is added and update package list</p>
+<pre><code>sudo add-apt-repository ppa:graphics-drivers
+sudo apt-get update
+</code></pre>
+<p>Install latest driver</p>
+<pre><code>sudo apt-get install nvidia-440
+</code></pre>
+<p>Another way is to read <a href="https://www.linuxbabe.com/ubuntu/install-nvidia-driver-ubuntu-18-04">this</a> and use the latest drivers.</p>
+<pre><code>sudo ubuntu-drivers devices
+sudo ubuntu-drivers nvidia-driver-440
+</code></pre>
+<h2 id="installing-cuda-100">Installing CUDA 10.0</h2>
+<p>Now the hard part is over, we will install CUDA</p>
+<p>Download the <code>runfile (local)</code> from <a href="https://developer.nvidia.com/cuda-downloads">here</a></p>
+<p>Something like this:</p>
+<p><img alt="alt text" src="../img/cuda.jpg" /></p>
+<p><strong>under development</strong></p>
+<p>Source of inspiration for this guide, that helped me a lot.</p>
+<p><a href="https://gist.github.com/matheustguimaraes/43e0b65aa534db4df2918f835b9b361d">Install CUDA 10.0 and cuDNN v7.4.2 on Ubuntu 16.04</a></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../troubleshooting/" class="btn btn-neutral" title="Troubleshooting"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../troubleshooting/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+
+</body>
+</html>

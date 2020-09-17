@@ -19,6 +19,11 @@ Please see below further instructions about how to build barcoded direct RNA lib
 - Script to demultiplex direct RNA fast5 reads, barcoded using the strategy described above
 - Example fast5 data built using the 4 custom barcoded adaptors
 
+
+## Publication - Genome Research
+
+https://genome.cshlp.org/content/30/9/1345
+
 ## Pre-print
 
 https://www.biorxiv.org/content/10.1101/864322v2.abstract
@@ -157,4 +162,9 @@ Full library versions used:
 ## Citing this work:
 If you find this work useful, please cite:
 
-Martin A. Smith, Tansel Ersavas, James M. Ferguson, Huanle Liu, Morghan C. Lucas, Oguzhan Begik, Lilly Bojarski, Kirston Barton, Eva Maria Novoa. Barcoding and demultiplexing Oxford Nanopore direct RNA sequencing reads with deep residual learning. bioRxiv 2019
+Smith MA, Ersavas T, Ferguson JM, et al. Molecular barcoding of native RNAs using nanopore sequencing and deep learning. Genome Res. 2020;30(9):1345-1353. doi:10.1101/gr.260836.120
+
+
+## Full Author list:
+
+Martin A. Smith, Tansel Ersavas, James M. Ferguson, Huanle Liu, Morghan C. Lucas, Oguzhan Begik, Lilly Bojarski, Kirston Barton, Eva Maria Novoa

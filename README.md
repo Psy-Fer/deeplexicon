@@ -162,9 +162,5 @@ Full library versions used:
 ## Citing this work:
 If you find this work useful, please cite:
 
-Smith MA, Ersavas T, Ferguson JM, et al. Molecular barcoding of native RNAs using nanopore sequencing and deep learning. Genome Res. 2020;30(9):1345-1353. doi:10.1101/gr.260836.120
+Smith MA, Ersavas T, Ferguson JM, Liu H, Lucas MC, Begik O, Bojarski L, Barton K, Novoa EM. Molecular barcoding of native RNAs using nanopore sequencing and deep learning. Genome Res. 2020;30(9):1345-1353. doi:10.1101/gr.260836.120
 
-
-## Full Author list:
-
-Martin A. Smith, Tansel Ersavas, James M. Ferguson, Huanle Liu, Morghan C. Lucas, Oguzhan Begik, Lilly Bojarski, Kirston Barton, Eva Maria Novoa

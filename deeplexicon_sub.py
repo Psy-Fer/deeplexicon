@@ -547,12 +547,12 @@ def get_single_fast5_signal(read_filename, w, squig_file, seg_file):
     return readID, pA_signal[seg[0]:seg[1]]
 
 
-def get_multi_fast5_signal(read_filename, w, squig_file, seg_file, train=False, test=None):
+def get_multi_fast5_signal(read_filename, w, squig_file, seg_file, train=False, test=False):
     '''
     open multi fast5 files and extract information
     '''
     test_state = False
-    if test > 0:
+    if test:
         test_state = True
     pA_signals = {}
     seg_dic = {}

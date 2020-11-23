@@ -138,7 +138,7 @@ squiggle_max = 1199
 squiggle_min = 1
 input_cut = 72000 #potenitall need to be configurable
 image_size = 224
-num_classes = 4
+# num_classes = 4 #make this variable to array size/flag
 window = 2000
 
 def main():
@@ -171,6 +171,8 @@ def main():
                         help="probability threshold - 0.5 hi accuracy / 0.3 hi recovery")
     dmux.add_argument("-m", "--model",
                         help="Trained model name to use")
+    dmux.add_argument('-N', '--Number', type=int, default=4,
+                        help="Number of barcodes to dmux. controls header for custom models")
     dmux.add_argument("-g", "--gpu", action="store_true",
                         help="Use GPU if available - experimental")
     dmux.add_argument("--squiggle", default=False,
@@ -179,6 +181,8 @@ def main():
                         help="dump segment data into this .tsv file")
     dmux.add_argument("-b", "--batch_size", type=int, default=1000,
                         help="batch size - for single fast5s")
+    dmux.add_argument('-t', '--test', type=int,
+                        help="test with -t number of reads")
     dmux.add_argument('-v', '--verbose', action='count', default=0,
                         help="Verbose output [v/vv/vvv]")
 
@@ -212,6 +216,8 @@ def main():
                         help="Testing truth set(s) in one-hot format eg: readID, 0, 0, 1, 0 for barcode 3 of 4 ")
     train.add_argument('-u', '--val_truth', nargs='+',
                         help="Validation truth set(s) in one-hot format eg: readID, 0, 0, 1, 0 for barcode 3 of 4 ")
+    train.add_argument('-N', '--Number', type=int,
+                        help="Number of barcodes to train. Should be auto detected, but set to check")
     train.add_argument('-n', '--network', default="ResNet20",
                         help="Network to use (see table in docs)")
     train.add_argument('--net_version', type=int, default=2,
@@ -326,12 +332,17 @@ def dmux_pipeline(args):
         sys.exit(1)
     model = read_model(args.model)
     # make this an optional config input for custom barcode sets
-    barcode_out = {0: "bc_1",
-                   1: "bc_2",
-                   2: "bc_3",
-                   3: "bc_4",
-                   None: "unknown"
-                   }
+    # make this dynamic
+    # barcode_out = {0: "bc_1",
+    #                1: "bc_2",
+    #                2: "bc_3",
+    #                3: "bc_4",
+    #                None: "unknown"
+    #                }
+    # if someone does more than 50 samples I will skull a beer cause that's awesome!
+    # left here to remind me when I have to make the update
+    barcode_out = {i: "bc_{}".format(i+1) for i in range(0, 50)}
+    barcode_out[None] = "unknown"
     labels = []
     images = []
     fast5s = {}
@@ -350,7 +361,8 @@ def dmux_pipeline(args):
             f.write("{}\t{}\t{}\n".format("ReadID", "start", "stop"))
     else:
         seg_file = ""
-    print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format("fast5", "ReadID", "Barcode", "Confidence Interval", "P_bc_1", "P_bc_2", "P_bc_3", "P_bc_4"))
+    # make this dynamic for number of barcodes
+    print("{}\t{}\t{}\t{}\t{}".format("fast5", "ReadID", "Barcode", "Confidence Interval", "\t".join(["P_bc_{}".format(i) for i in range(1,args.Number+1)])))
     # for file in input...
     # TODO: sub-module
     for path in args.path:
@@ -382,7 +394,8 @@ def dmux_pipeline(args):
                                 cm = round(float(c), 4)
                                 if args.verbose:
                                     print_verbose("cm is: {}".format(cm))
-                                print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, prob[0], prob[1], prob[2], prob[3]))
+                                # make this dynamic
+                                print("{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, "\t".join(["{:.5f}".format(prob[i]) for i in range(0,len(prob))])))
                             labels = []
                             images = []
                             fast5s = {}
@@ -392,7 +405,7 @@ def dmux_pipeline(args):
                         #everthing below this, send off in batches of N=args.batch_size
                         # The signal extraction and segmentation can happen in the first step
                         # read fast5 files
-                        seg_signal = get_multi_fast5_signal(fast5_file, window, squig_file, seg_file)
+                        seg_signal = get_multi_fast5_signal(fast5_file, window, squig_file, seg_file, test=args.test)
                         sig_count = 0
                         for readID in seg_signal:
                             # convert
@@ -410,7 +423,8 @@ def dmux_pipeline(args):
                                     cm = round(float(c), 4)
                                     if args.verbose:
                                         print_verbose("cm is: {}".format(cm))
-                                    print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, prob[0], prob[1], prob[2], prob[3]))
+                                    # make this dynamic
+                                    print("{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, "\t".join(["{:.5f}".format(prob[i]) for i in range(0,len(prob))])))
                                 labels = []
                                 images = []
                                 fast5s = {}
@@ -427,8 +441,8 @@ def dmux_pipeline(args):
             cm = round(float(c), 4)
             if args.verbose:
                 print_verbose("cm is: {}".format(cm))
-            print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, prob[0], prob[1], prob[2], prob[3]))
-        labels = []
+            # Make this dynamic
+            print("{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, "\t".join(["{:.5f}".format(prob[i]) for i in range(0,len(prob))])))
         images = []
         fast5s = {}
 
@@ -533,10 +547,13 @@ def get_single_fast5_signal(read_filename, w, squig_file, seg_file):
     return readID, pA_signal[seg[0]:seg[1]]
 
 
-def get_multi_fast5_signal(read_filename, w, squig_file, seg_file, train=False):
+def get_multi_fast5_signal(read_filename, w, squig_file, seg_file, train=False, test=None):
     '''
     open multi fast5 files and extract information
     '''
+    test_state = False
+    if test > 0:
+        test_state = True
     pA_signals = {}
     seg_dic = {}
     f5_dic = read_multi_fast5(read_filename, reads=train)
@@ -544,6 +561,9 @@ def get_multi_fast5_signal(read_filename, w, squig_file, seg_file, train=False):
     sig_count = 0
     for read in f5_dic:
         sig_count += 1
+        if test_state:
+            if sig_count > test:
+                continue
         print_verbose("reading sig_count: {}/{}".format(sig_count, len(f5_dic)))
         # get readID and signal
         readID = f5_dic[read]['readID']
@@ -1120,7 +1140,7 @@ def train_pipeline(args):
 
     def train_model(run_name, net_type,version,  epochs,  x_train, y_train, x_test, y_test,
                gpus=1,per_gpu_batch_size=16,tensorboard_output=None, data_augmentation = False,
-               subtract_pixel_mean = False, verbose=0, x_val=False, y_val=False):
+               subtract_pixel_mean = False, verbose=0, x_val=False, y_val=False, num_barcodes=4):
 
         batch_size=per_gpu_batch_size*gpus  # multiply by number of GPUs
 
@@ -1135,9 +1155,9 @@ def train_pipeline(args):
             return(None) # Means Invalid Network Type or Version
 
         if version == 2:
-            model = resnet_v2(input_shape=input_shape, depth=depth)
+            model = resnet_v2(input_shape=input_shape, depth=depth, num_classes=num_barcodes)
         else:
-            model = resnet_v1(input_shape=input_shape, depth=depth)
+            model = resnet_v1(input_shape=input_shape, depth=depth, num_classes=num_barcodes)
         model.summary()
         #    plot_model(model, to_file='model_plot.svg', show_shapes=True, show_layer_names=True)
         # if gpus>1:
@@ -1261,6 +1281,19 @@ def train_pipeline(args):
                 train_truth_dic[readID] = np.array([float(i) for i in l[1:]], dtype=float)
     train_readIDs = set(train_truth_dic.keys())
 
+    hot_number = train_truth_dic[readID].shape[0]
+    if args.Number:
+        print("1-hot number of barcodes to train: {}".format(hot_number))
+        print("args.Number: {}".format(args.Number))
+        if args.Number == hot_number:
+            print("Number of barcodes and 1-hot fields match!")
+        else:
+            print("Number of barcodes and 1-hot fields do not match, exiting.")
+            sys.exit()
+    else:
+        print("1-hot number of barcodes detected to train: {}".format(hot_number))
+
+
     test_truth_dic = {}
     for test_file in args.test_truth:
         with open(test_file, 'rt') as tt:
@@ -1285,6 +1318,7 @@ def train_pipeline(args):
                     readID = l[0]
                     val_truth_dic[readID] = np.array([float(i) for i in l[1:]], dtype=float)
         val_readIDs = set(val_truth_dic.keys())
+
 
     all_reads = set()
     all_reads.update(train_readIDs)
@@ -1347,12 +1381,12 @@ def train_pipeline(args):
                         np.array(train_images), np.array(train_labels),
                         np.array(test_images), np.array(test_labels),
                         gpus=gpus,per_gpu_batch_size=batch_control,
-                        x_val=np.array(val_images), y_val=np.array(val_labels))
+                        x_val=np.array(val_images), y_val=np.array(val_labels), num_barcodes=hot_number)
     else:
         ret=train_model(args.prefix, args.network, args.net_version, args.epochs,
                         np.array(train_images), np.array(train_labels),
                         np.array(test_images), np.array(test_labels),
-                        gpus=gpus,per_gpu_batch_size=batch_control)
+                        gpus=gpus,per_gpu_batch_size=batch_control, num_barcodes=hot_number)
 
 
     return

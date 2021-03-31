@@ -235,6 +235,10 @@ def main():
     squig = subcommand.add_parser('squig', help='extract/segment squiggles - no dmux',
                                   formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     # squig sub-module options
+    squig.add_argument("-p", "--path", nargs='+',
+                        help="Top path(s) of fast5 files to dmux")
+    squig.add_argument("-f", "--form", default="multi", choices=["multi", "single"],
+                        help="Multi or single fast5s (multi only for squig module)")
     squig.add_argument("--squiggle",
                         help="dump squiggle data into this .tsv file")
     squig.add_argument("--segment",
@@ -1396,6 +1400,32 @@ def squig_pipeline(args):
     '''
     extract/segment squiggles
     '''
+    if args.squiggle:
+        squig_file = args.squiggle
+        with open(squig_file, 'a') as f:
+            f.write("{}\t{}\n".format("ReadID", "signal_pA"))
+    else:
+        squig_file = ''
+    # TODO: sub-module
+    if args.segment:
+        seg_file = args.segment
+        with open(seg_file, 'a') as f:
+            f.write("{}\t{}\t{}\n".format("ReadID", "start", "stop"))
+    else:
+        seg_file = ""
+    for path in args.path:
+        for dirpath, dirnames, files in os.walk(path):
+            for fast5 in files:
+                if fast5.endswith('.fast5'):
+                    fast5_file = os.path.join(dirpath, fast5)
+                    if args.form == "multi":
+                        #everthing below this, send off in batches of N=args.batch_size
+                        # The signal extraction and segmentation can happen in the first step
+                        # read fast5 files
+                        seg_signal = get_multi_fast5_signal(fast5_file, window, squig_file, seg_file)
+                    else:
+                        print_err("Multi-fast5 support only in this moduel")
+                        sys.exit()
 
     return
 

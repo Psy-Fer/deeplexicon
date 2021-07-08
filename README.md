@@ -61,7 +61,7 @@ https://psy-fer.github.io/deeplexicon/
 
 #### source and install requirements CPU
     source Deeplexicon/bin/activate
-    pip install Keras==2.2.4 Pandas PyTs==0.8.0 Scikit-learn numba==0.45.0 TensorFlow==1.13.1
+    pip install h5py==2.10 Keras==2.2.4 Pandas PyTs==0.8.0 Scikit-learn numba==0.53 TensorFlow==1.13.1
 
 #### Source and install requirements GPU
 

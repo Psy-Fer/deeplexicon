@@ -63,12 +63,37 @@ https://psy-fer.github.io/deeplexicon/
     source Deeplexicon/bin/activate
     pip install h5py==2.10 Keras==2.2.4 Pandas PyTs==0.8.0 Scikit-learn numba==0.53 TensorFlow==1.13.1
 
-#### Source and install requirements GPU
+#### Source and install requirements GPU (experimental)
 
-##### (Coming soon)
+1. Install cuda-10-0 and [cuDNN v7.6](https://developer.nvidia.com/rdp/cudnn-archive). 
 
-<!-- source Deeplexicon/bin/activate
-pip3 install Keras tensorflow-gpu Pandas PyTs Scikit-learn numba==0.45.0 -->
+```bash
+# install cuda-10-0
+sudo apt install cuda-10-0
+# cuDNN needs to be downloaded & installed manually from https://developer.nvidia.com/rdp/cudnn-archive
+```
+
+2. Install dependencies
+
+```bash
+mkdir -p ~/src
+git clone https://github.com/Psy-Fer/deeplexicon.git
+
+python3 -m venv ~/src/venv/deeplexicon-gpu
+source ~/src/venv/deeplexicon-gpu/bin/activate
+pip install h5py==2.10 Keras==2.2.4 Pandas PyTs==0.8.0 Scikit-learn numba==0.53 TensorFlow-gpu==1.13.1
+```
+
+3. Enjoy!
+
+```bash
+source ~/src/venv/deeplexicon-gpu
+# single-core version
+time ~/src/deeplexicon/deeplexicon_sub.py dmux -g -p Fast5_folder -m ~/src/deeplexicon/models/resnet20-final.h5 > demux-gpu.tsv
+
+# or multi-threaded version
+time ~/src/deeplexicon/deeplexicon_multi.py dmux -g --threads 4 -p Fast5_folder -m ~/src/deeplexicon/models/resnet20-final.h5 > demux_multi-gpu.tsv
+```
 
 ## Version 1.1.0 (pre-release)
 

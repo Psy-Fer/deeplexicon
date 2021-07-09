@@ -35,6 +35,7 @@ from sklearn import datasets, linear_model
 from sklearn.model_selection import train_test_split
 from tensorflow.python.client import device_lib
 from keras.models import load_model
+from pathlib import Path
 
 
 '''
@@ -45,6 +46,8 @@ from keras.models import load_model
     Copyright 2019
 
     Tansel Ersevas (t.ersevas@garvan.org.au)
+
+    Leszek Pryszcz (lpryszcz@crg.es)
 
     script description
 
@@ -58,6 +61,7 @@ from keras.models import load_model
     version 0.9.2 - separate segment output and code clean up
     version 1.0.0 - initial release
     version 1.1.0 - added submodules, splitting, and trining
+    version 1.2.0 - segmentation ~10x faster; added multiprocessing via deeplexicon_multi.py (only for multi_fast5 files)
 
     So a cutoff of: 0.4958776 for high accuradef read_config(filename):
     config = configparser.ConfigParser()
@@ -145,7 +149,7 @@ def main():
     '''
     Main function
     '''
-    VERSION = "1.1.0"
+    VERSION = "1.2.0"
 
     parser = MyParser(
         description="DeePlexiCon - Demultiplex barcoded ONT direct-RNA sequencing reads",
@@ -365,90 +369,93 @@ def dmux_pipeline(args):
             f.write("{}\t{}\t{}\n".format("ReadID", "start", "stop"))
     else:
         seg_file = ""
+        
     # make this dynamic for number of barcodes
     print("{}\t{}\t{}\t{}\t{}".format("fast5", "ReadID", "Barcode", "Confidence Interval", "\t".join(["P_bc_{}".format(i) for i in range(1,args.Number+1)])))
     # for file in input...
     # TODO: sub-module
+    fnames = []
     for path in args.path:
-        for dirpath, dirnames, files in os.walk(path):
-            for fast5 in files:
-                if fast5.endswith('.fast5'):
-                    fast5_file = os.path.join(dirpath, fast5)
-                    if args.form == "single":
-                        #everthing below this, send off in batches of N=args.batch_size
-                        # The signal extraction and segmentation can happen in the first step
-                        # read fast5 files
-                        # make generator to speed up real time results
-                        readID, seg_signal = get_single_fast5_signal(fast5_file, window, squig_file, seg_file)
-                        if not seg_signal:
-                            print_err("Segment not found for:\t{}\t{}".format(fast5_file, readID))
-                            continue
-                        # convert
-                        sig = np.array(seg_signal, dtype=float)
-                        img = convert_to_image(sig)
-                        labels.append(readID)
-                        fast5s[readID] = fast5
-                        images.append(img)
-                        # classify
-                        if len(labels) >= args.batch_size:
-                            C = classify(model, labels, np.array(images), False, args.threshold)
-                            # save to output
-                            for readID, out, c, P in C:
-                                prob = [round(float(i), 6) for i in P]
-                                cm = round(float(c), 4)
-                                if args.verbose:
-                                    print_verbose("cm is: {}".format(cm))
-                                # make this dynamic
-                                print("{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, "\t".join(["{:.5f}".format(prob[i]) for i in range(0,len(prob))])))
-                            labels = []
-                            images = []
-                            fast5s = {}
+        fnames += list(sorted(map(str, Path(path).rglob('*.fast5'))))
+    for fi, fast5_file in enumerate(fnames, 1):
+        # get fname
+        fast5 = os.path.basename(fast5_file)
+        sys.stderr.write("%s / %s %s\n"%(fi, len(fnames), fast5_file))
+        if args.form == "single":
+            #everthing below this, send off in batches of N=args.batch_size
+            # The signal extraction and segmentation can happen in the first step
+            # read fast5 files
+            # make generator to speed up real time results
+            readID, seg_signal = get_single_fast5_signal(fast5_file, window, squig_file, seg_file)
+            if not seg_signal:
+                print_err("Segment not found for:\t{}\t{}".format(fast5_file, readID))
+                continue
+            # convert
+            sig = np.array(seg_signal, dtype=float)
+            img = convert_to_image(sig)
+            labels.append(readID)
+            fast5s[readID] = fast5
+            images.append(img)
+            # classify
+            if len(labels) >= args.batch_size:
+                C = classify(model, labels, np.array(images), False, args.threshold)
+                # save to output
+                for readID, out, c, P in C:
+                    prob = [round(float(i), 6) for i in P]
+                    cm = round(float(c), 4)
+                    if args.verbose:
+                        print_verbose("cm is: {}".format(cm))
+                    # make this dynamic
+                    print("{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, "\t".join(["{:.5f}".format(prob[i]) for i in range(0,len(prob))])))
+                labels = []
+                images = []
+                fast5s = {}
 
-                    # TODO: sub-module
-                    elif args.form == "multi":
-                        #everthing below this, send off in batches of N=args.batch_size
-                        # The signal extraction and segmentation can happen in the first step
-                        # read fast5 files
-                        seg_signal = get_multi_fast5_signal(fast5_file, window, squig_file, seg_file, test=args.test)
-                        sig_count = 0
-                        for readID in seg_signal:
-                            # convert
-                            img = convert_to_image(np.array(seg_signal[readID], dtype=float))
-                            labels.append(readID)
-                            images.append(img)
-                            fast5s[readID] = fast5
-                            sig_count += 1
-                            # TODO: sub-module
-                            if len(labels) >= args.batch_size:
-                                C = classify(model, labels, np.array(images), False, args.threshold)
-                                # save to output
-                                for readID, out, c, P in C:
-                                    prob = [round(float(i), 6) for i in P]
-                                    cm = round(float(c), 4)
-                                    if args.verbose:
-                                        print_verbose("cm is: {}".format(cm))
-                                    # make this dynamic
-                                    print("{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, "\t".join(["{:.5f}".format(prob[i]) for i in range(0,len(prob))])))
-                                labels = []
-                                images = []
-                                fast5s = {}
-                            elif args.verbose:
-                                print_verbose("analysing sig_count: {}/{}".format(sig_count, len(seg_signal)))
-                            else:
-                                blah = 0 # clean
-        #finish up
         # TODO: sub-module
-        C = classify(model, labels, np.array(images), False, args.threshold)
-        # save to output
-        for readID, out, c, P in C:
-            prob = [round(float(i), 6) for i in P]
-            cm = round(float(c), 4)
-            if args.verbose:
-                print_verbose("cm is: {}".format(cm))
-            # Make this dynamic
-            print("{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, "\t".join(["{:.5f}".format(prob[i]) for i in range(0,len(prob))])))
-        images = []
-        fast5s = {}
+        elif args.form == "multi":
+            #everthing below this, send off in batches of N=args.batch_size
+            # The signal extraction and segmentation can happen in the first step
+            # read fast5 files
+            seg_signal = get_multi_fast5_signal(fast5_file, window, squig_file, seg_file, test=args.test)
+            sig_count = 0
+            for readID in seg_signal:
+                # convert
+                img = convert_to_image(np.array(seg_signal[readID], dtype=float))
+                labels.append(readID)
+                images.append(img)
+                fast5s[readID] = fast5
+                sig_count += 1
+                # TODO: sub-module
+                if len(labels) >= args.batch_size:
+                    C = classify(model, labels, np.array(images), False, args.threshold)
+                    # save to output
+                    for readID, out, c, P in C:
+                        prob = [round(float(i), 6) for i in P]
+                        cm = round(float(c), 4)
+                        if args.verbose:
+                            print_verbose("cm is: {}".format(cm))
+                        # make this dynamic
+                        print("{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, "\t".join(["{:.5f}".format(prob[i]) for i in range(0,len(prob))])))
+                    labels = []
+                    images = []
+                    fast5s = {}
+                elif args.verbose:
+                    print_verbose("analysing sig_count: {}/{}".format(sig_count, len(seg_signal)))
+                else:
+                    blah = 0 # clean
+    #finish up
+    # TODO: sub-module
+    C = classify(model, labels, np.array(images), False, args.threshold)
+    # save to output
+    for readID, out, c, P in C:
+        prob = [round(float(i), 6) for i in P]
+        cm = round(float(c), 4)
+        if args.verbose:
+            print_verbose("cm is: {}".format(cm))
+        # Make this dynamic
+        print("{}\t{}\t{}\t{}\t{}".format(fast5s[readID], readID, barcode_out[out], cm, "\t".join(["{:.5f}".format(prob[i]) for i in range(0,len(prob))])))
+    images = []
+    fast5s = {}
 
 
     # final report/stats
@@ -540,7 +547,8 @@ def get_single_fast5_signal(read_filename, w, squig_file, seg_file):
         print_verbose("No segment found - skipping: {}".format(readID))
         return 0, 0
     # convert to pA
-    pA_signal = convert_to_pA(f5_dic)
+    ##this is slooow & useless since gasf will norm the values anyway 
+    pA_signal = signal #convert_to_pA(f5_dic)
     if squig_file:
         with open(squig_file, 'a') as f:
             f.write("{}\t{}\n".format(readID, "\t".join(pA_signal)))
@@ -560,18 +568,16 @@ def get_multi_fast5_signal(read_filename, w, squig_file, seg_file, train=False, 
         test_state = True
     pA_signals = {}
     seg_dic = {}
-    f5_dic = read_multi_fast5(read_filename, reads=train)
     seg = 0
     sig_count = 0
-    for read in f5_dic:
-        sig_count += 1
+    for sig_count, read in enumerate(read_multi_fast5(read_filename, reads=train), 1):
         if test_state:
             if sig_count > test:
                 continue
-        print_verbose("reading sig_count: {}/{}".format(sig_count, len(f5_dic)))
+        if not sig_count%10: sys.stderr.write(" %s \r"%sig_count)        
         # get readID and signal
-        readID = f5_dic[read]['readID']
-        signal = f5_dic[read]['signal']
+        readID = read['readID']
+        signal = read['signal']
 
         # segment on raw
         seg = dRNA_segmenter(readID, signal, w)
@@ -579,7 +585,8 @@ def get_multi_fast5_signal(read_filename, w, squig_file, seg_file, train=False, 
             seg = 0
             continue
         # convert to pA
-        pA_signal = convert_to_pA(f5_dic[read])
+        ##this is slooow & useless since gasf will norm the values anyway 
+        pA_signal = signal #convert_to_pA(read)
         if squig_file:
             with open(squig_file, 'a') as f:
                 f.write("{}\t{}\n".format(readID, "\t".join(pA_signal)))
@@ -590,7 +597,6 @@ def get_multi_fast5_signal(read_filename, w, squig_file, seg_file, train=False, 
         seg_dic[readID] = seg
     # return signal/signals
     return pA_signals
-
 
 def read_single_fast5(filename):
     '''
@@ -611,7 +617,7 @@ def read_single_fast5(filename):
         c = list(hdf['Raw/Reads'].keys())
         # for col in hdf['Raw/Reads/'][c[0]]['Signal'][()]:
         #     f5_dic['signal'].append(int(col))
-        f5_dic['signal'] = hdf['Raw/Reads/'][c[0]]['Signal'][()]
+        f5_dic['signal'] = hdf['Raw/Reads/'][c[0]]['Signal']#[()] # much faster
 
         f5_dic['readID'] = hdf['Raw/Reads/'][c[0]].attrs['read_id'].decode()
         f5_dic['digitisation'] = hdf['UniqueGlobalKey/channel_id'].attrs['digitisation']
@@ -641,7 +647,7 @@ def read_multi_fast5(filename, reads=False):
                 f5_dic[read] = {'signal': [], 'readID': '', 'digitisation': 0.0,
                 'offset': 0.0, 'range': 0.0, 'sampling_rate': 0.0}
 
-                f5_dic[read]['signal'] = hdf[read]['Raw/Signal'][()]
+                f5_dic[read]['signal'] = hdf[read]['Raw/Signal']#[()] # much faster
                 f5_dic[read]['readID'] = hdf[read]['Raw'].attrs['read_id'].decode()
                 f5_dic[read]['digitisation'] = hdf[read]['channel_id'].attrs['digitisation']
                 f5_dic[read]['offset'] = hdf[read]['channel_id'].attrs['offset']
@@ -652,6 +658,26 @@ def read_multi_fast5(filename, reads=False):
                 print_err("extract_fast5():failed to read readID: {}".format(read))
     return f5_dic
 
+def read_multi_fast5(filename, reads=False):
+    '''read multifast5 file efficiently and return data'''
+    with h5py.File(filename, 'r') as hdf:
+        for readid in hdf:
+            try:
+                r = hdf[readid]
+                if reads:
+                    if hdf[read]['Raw'].attrs['read_id'].decode() not in reads:
+                        continue
+                read = {'signal': r['Raw/Signal'], 
+                        'readID': r['Raw'].attrs['read_id'].decode(), 
+                        'digitisation': r['channel_id'].attrs['digitisation'],
+                         'offset': r['channel_id'].attrs['offset'], 
+                        'range': float("{0:.2f}".format(r['channel_id'].attrs['range'])), 
+                        'sampling_rate': r['channel_id'].attrs['sampling_rate'], 
+                       }
+                yield read
+            except:
+                traceback.print_exc()
+                print_err("extract_fast5():failed to read readID: {}".format(readid))            
 
 def dRNA_segmenter(readID, signal, w):
     '''
@@ -727,26 +753,6 @@ def dRNA_segmenter(readID, signal, w):
         break
     print_verbose("dRNA_segmenter: no seg found: {}".format(readID))
     return 0
-
-
-def convert_to_pA(d):
-    '''
-    convert raw signal data to pA using digitisation, offset, and range
-    float raw_unit = range / digitisation;
-    for (int32_t j = 0; j < nsample; j++) {
-        rawptr[j] = (rawptr[j] + offset) * raw_unit;
-    }
-    '''
-    digitisation = d['digitisation']
-    range = d['range']
-    offset = d['offset']
-    raw_unit = range / digitisation
-    new_raw = []
-    for i in d['signal']:
-        j = (i + offset) * raw_unit
-        new_raw.append("{0:.2f}".format(round(j,2)))
-    return new_raw
-
 
 def pyts_transform(transform, data, image_size, show=False, cmap='rainbow', img_index=0):
     try:

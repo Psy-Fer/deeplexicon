@@ -3,9 +3,6 @@
 
 from deeplexicon_sub import *
 from multiprocessing import Pool
-#import matplotlib.pyplot as plt
-#import numpy as np
-#from scipy import signal
 
 '''
 
@@ -316,7 +313,7 @@ def dmux_pipeline(args):
         # The signal extraction and segmentation can happen in the first step
         # read fast5 files
         for sig_count, readID in enumerate(seg_signal, 1):
-            # convert
+            # convert - it may be even better to convert to image within subprocess
             img = convert_to_image(np.array(seg_signal[readID], dtype=float))
             labels.append(readID)
             images.append(img)

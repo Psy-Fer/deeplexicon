@@ -18,7 +18,7 @@ RUN pip install h5py==2.10 Keras==2.2.4 Pandas PyTs==0.8.0 Scikit-learn numba==0
 
 #Installing Deeplexicon
 RUN apt-get install -y git liblzma-dev
-RUN git clone --depth 1 https://github.com/lpryszcz/deeplexicon.git #&& rm -r deeplexicon/.git
+RUN git clone --depth 1 https://github.com/lpryszcz/deeplexicon.git && rm -r deeplexicon/.git
 RUN chmod +x deeplexicon/deeplexicon*.py
 ENV PATH "$PWD/deeplexicon/:${PATH}"
 

@@ -38,6 +38,10 @@ from keras.models import load_model
 from pathlib import Path
 from ont_fast5_api.fast5_interface import get_fast5_file
 
+config = tf.ConfigProto()
+config.gpu_options.per_process_gpu_memory_fraction = 0.8
+config.gpu_options.allow_growth = True
+sess = tf.Session(config=config)
 
 '''
 

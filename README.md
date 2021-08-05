@@ -99,12 +99,13 @@ time ~/src/deeplexicon/deeplexicon_multi.py dmux -g --threads 4 -p Fast5_folder 
 
 #### Docker images
 
-You can find Docker images for
-[CPU](https://hub.docker.com/repository/docker/lpryszcz/deeplexicon)
-and [GPU](https://hub.docker.com/repository/docker/lpryszcz/deeplexicon-gpu/).
+You can find [Docker images for CPU and GPU](https://hub.docker.com/repository/docker/lpryszcz/deeplexicon/).
 
 ```bash
 time docker run -u $UID:$GID -v /path_to_fast:/data lpryszcz/deeplexicon:1.2.0 deeplexicon_multi.py dmux --threads 2 -p /data -m deeplexicon/models/resnet20-final.h5 > docker.demux2.tsv
+
+# or using GPU version - you'll need to have nvidia-docker and CUDA installed
+time docker run --gpus all -u $UID:$GID -v /path_to_fast:/data lpryszcz/deeplexicon:1.2.0-gpu deeplexicon_sub.py dmux -p /data -m deeplexicon/models/resnet20-final.h5 > $d.demux.docker-gpu.tsv
 ```
 
 ### Comparison of runtimes

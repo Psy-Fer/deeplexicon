@@ -14,10 +14,10 @@ RUN ln -s /usr/local/bin/python3 /usr/local/bin/python; ln -s /usr/local/bin/pip
 
 #Installing modules for Deeplexicon
 RUN pip install --upgrade pip setuptools
-RUN pip install h5py==2.10 Keras==2.2.4 Pandas PyTs==0.8.0 Scikit-learn numba==0.53 TensorFlow==1.13.1
+RUN pip install ont_fast5_api h5py==2.10 Keras==2.2.4 Pandas PyTs==0.8.0 Scikit-learn numba==0.53 TensorFlow-gpu==1.13.1
 
 #Installing Deeplexicon
-RUN apt-get install -y git liblzma-dev
+RUN apt update && apt-get install -y git liblzma-dev
 RUN git clone --depth 1 https://github.com/lpryszcz/deeplexicon.git && rm -r deeplexicon/.git
 RUN chmod +x deeplexicon/deeplexicon*.py
 ENV PATH "$PWD/deeplexicon/:${PATH}"

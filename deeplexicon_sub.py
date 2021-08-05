@@ -36,6 +36,7 @@ from sklearn.model_selection import train_test_split
 from tensorflow.python.client import device_lib
 from keras.models import load_model
 from pathlib import Path
+from ont_fast5_api.fast5_interface import get_fast5_file
 
 
 '''
@@ -632,43 +633,15 @@ def read_single_fast5(filename):
 
     return f5_dic
 
-
-def read_multi_fast5(filename, reads=False):
-    '''
-    read multifast5 file and return data
-    '''
-    f5_dic = {}
-    with h5py.File(filename, 'r') as hdf:
-        for read in list(hdf.keys()):
-            try:
-                if reads:
-                    if hdf[read]['Raw'].attrs['read_id'].decode() not in reads:
-                        continue
-                f5_dic[read] = {'signal': [], 'readID': '', 'digitisation': 0.0,
-                'offset': 0.0, 'range': 0.0, 'sampling_rate': 0.0}
-
-                f5_dic[read]['signal'] = hdf[read]['Raw/Signal']#[()] # much faster
-                f5_dic[read]['readID'] = hdf[read]['Raw'].attrs['read_id'].decode()
-                f5_dic[read]['digitisation'] = hdf[read]['channel_id'].attrs['digitisation']
-                f5_dic[read]['offset'] = hdf[read]['channel_id'].attrs['offset']
-                f5_dic[read]['range'] = float("{0:.2f}".format(hdf[read]['channel_id'].attrs['range']))
-                f5_dic[read]['sampling_rate'] = hdf[read]['channel_id'].attrs['sampling_rate']
-            except:
-                traceback.print_exc()
-                print_err("extract_fast5():failed to read readID: {}".format(read))
-    return f5_dic
-
 def read_multi_fast5(filename, reads=False):
     '''read multifast5 file efficiently and return data'''
     with h5py.File(filename, 'r') as hdf:
         for readid in hdf:
             try:
                 r = hdf[readid]
-                if reads:
-                    if hdf[read]['Raw'].attrs['read_id'].decode() not in reads:
-                        continue
+                if reads and readid not in reads: continue
                 read = {'signal': r['Raw/Signal'], 
-                        'readID': r['Raw'].attrs['read_id'].decode(), 
+                        'readID': readid, 
                         'digitisation': r['channel_id'].attrs['digitisation'],
                          'offset': r['channel_id'].attrs['offset'], 
                         'range': float("{0:.2f}".format(r['channel_id'].attrs['range'])), 
@@ -677,8 +650,28 @@ def read_multi_fast5(filename, reads=False):
                 yield read
             except:
                 traceback.print_exc()
-                print_err("extract_fast5():failed to read readID: {}".format(readid))            
-
+                print_err("extract_fast5():failed to read readID: {}".format(readid))
+                
+def read_multi_fast5(filename, reads=False, scale=False):
+    '''read multifast5 file efficiently and return data'''
+    with get_fast5_file(filename, mode="r") as f5:
+        for r in f5.get_reads():
+            readid = r.read_id
+            try:
+                if reads and readid not in reads: continue
+                channel_info = r.get_channel_info()
+                read = {'signal': r.get_raw_data(scale=scale), 
+                        'readID': readid, 
+                        'digitisation': channel_info['digitisation'],
+                         'offset': channel_info['offset'], 
+                        'range': round(channel_info['range'], 2), 
+                        'sampling_rate': channel_info['sampling_rate'], 
+                       }
+                yield read
+            except:
+                traceback.print_exc()
+                print_err("extract_fast5():failed to read readID: {}".format(readid))
+                
 def dRNA_segmenter(readID, signal, w):
     '''
     segment signal/s and return coords of cuts

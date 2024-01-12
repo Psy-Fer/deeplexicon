@@ -4,7 +4,7 @@ Signal-based demultiplexing of direct RNA sequencing reads using convolutional n
 
 ## IMPORTANT WARNING 
 
-Please note:  **Please check with CUDA version you are using!**
+Please note:  **Please check which CUDA version you are using!**
 - DeePlexiCon works with **CUDA v10**.
 - DeePlexiCon does **NOT** work with CUDA v11, which is typically used by latest GPU cards. 
 - We will be offering a solution to demultiplex direct RNA reads using CUDA v11 and latest GPU cards very soon. Thanks! 

@@ -9,6 +9,17 @@ Please note:  **If using GPU mode, please check which CUDA version you are using
 - DeePlexiCon does **NOT** work with CUDA v11, which is typically used by latest GPU cards. 
 - We will be offering a solution to demultiplex direct RNA reads using CUDA v11 and latest GPU cards very soon. Thanks!
 
+## Table of Contents
+- [About DeePlexiCon](#About-DeePlexiCon)
+- [What'sincluded](#What's-included)
+- [Documentation](#Documentation) 
+- [Installation](#Installation) 
+- [Releases and Usage](#Releases-and-Usage) 
+- [How to build barcoded direct RNA sequencing libraries](#How-to-build-barcoded-direct-RNA-sequencing-libraries)
+- [Dependencies and versions](#Dependencies-and-versions) 
+- [Citing this work](#Citing-this-work) 
+- [Contact](#Contact) 
+ 
 ## About DeePlexiCon
 DeePlexiCon is a tool to demultiplex barcoded direct RNA sequencing reads from Oxford Nanopore Technologies.
 Please note that the software has been tested and validated with a set of 4x20bp barcodes listed below:                                     
@@ -27,18 +38,11 @@ Please see below further instructions about how to build barcoded direct RNA lib
 - Example fast5 data built using the 4 custom barcoded adaptors
 
 
-## Publication - Genome Research
+## Documentation
 
-https://genome.cshlp.org/content/30/9/1345
-
-## Pre-print
-
-https://www.biorxiv.org/content/10.1101/864322v2.abstract
-
-
-## Full documentation here
-
-https://psy-fer.github.io/deeplexicon/
+* Full documentation: https://psy-fer.github.io/deeplexicon/
+* Preprint: https://www.biorxiv.org/content/10.1101/864322v2.abstract
+* Publication in Genome Research: https://genome.cshlp.org/content/30/9/1345
 
 ## Installation
 
@@ -104,7 +108,7 @@ time ~/src/deeplexicon/deeplexicon_sub.py dmux -g -p Fast5_folder -m ~/src/deepl
 time ~/src/deeplexicon/deeplexicon_multi.py dmux -g --threads 4 -p Fast5_folder -m ~/src/deeplexicon/models/resnet20-final.h5 > demux_multi-gpu.tsv
 ```
 
-#### Docker images
+### Docker images
 
 You can find [Docker images for CPU and GPU](https://hub.docker.com/repository/docker/lpryszcz/deeplexicon/).
 
@@ -124,37 +128,39 @@ Version 1.2.0: optimisation of segmentation (10x speed-up) and gpu support.
 - v1.2.0 gpu 2:49 (user: 2:48)
 - v1.2.0 gpu --threads 2 2:05 (user 5:46)
 
-## Version 1.1.0 (pre-release)
+## Releases and Usage
 
-## Demultiplex the reads (fast5 input)
+### Version 1.1.0 (pre-release)
+
+#### Demultiplex the reads (fast5 input)
 
     python3 deeplexicon.py dmux -p ~/top/fast5/path/ -f multi -m models/resnet20-final.h5 > output.tsv
 
-## Split fastq
+#### Split fastq
 
     python3 deeplexicon.py split -i output.tsv -q combined.fastq -o dmux_folder/ -s sample_name
 
-## Train a new model
+#### Train a new model
 
 Please see full documentation for further explanation
 
     python deeplexicon.py train --path /fast5/top/path/ --train_truth train.tsv --test_truth test.tsv --val_truth val.tsv
 
 
-## Version 1.0.0 (stable)
+### Version 1.0.0 (stable)
 
-## Running the software
+#### Running the software
 
     python3 deeplexicon.py -p ~/top/fast5/path/ -f multi -m models/resnet20-final.h5 > output.tsv
 
-## Split fastq
+#### Split fastq
 
     python3 fastq_splitter.py -d output.tsv -q combined.fastq -o dmux_folder/ -s sample_name
 
 
 Please note, the current algorithm has been trained to demultiplex the 4 barcodes shown above. It will not accurately demultiplex reads if different sequences are used.
 
-## How to build barcoded direct RNA sequencing libraries:
+## How to build barcoded direct RNA sequencing libraries
 
 To build the barcoded libraries, the oligo DNA sequences listed below should be used instead of those coming with the direct RNA sequencing kit (RTA). The barcode is embedded in the oligoA sequence, which will be ligated to the RNA molecule during the library preparation.
 
@@ -175,11 +181,11 @@ OligoB:
 - OligoB_shuffle4: 5’-GAGGCGAGCGGTCAATTTTAATAAGACCGAGCGAAGACCTTTTTTTTTT-3’
 
 
-## Dependencies
+## Dependencies and versions
 
 Please note, if using GPU mode, DeePlexiCon only works with CUDA v10!!! (it does not work properly with CUDA v11, we are currently working on offering a solution for this, should be released early 2024)
 
-# Additional information:
+### Additional information:
 
 Full library versions used:
 

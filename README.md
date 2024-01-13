@@ -11,7 +11,7 @@ Please note:  **If using GPU mode, please check which CUDA version you are using
 
 ## Table of Contents
 - [About DeePlexiCon](#About-DeePlexiCon)
-- [What's included](#What's-included)
+- [What's included](#What\'s-included)
 - [Documentation](#Documentation) 
 - [Installation](#Installation) 
 - [Releases and Usage](#Releases-and-Usage) 

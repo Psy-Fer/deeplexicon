@@ -11,7 +11,6 @@ Please note:  **If using GPU mode, please check which CUDA version you are using
 
 ## Table of Contents
 - [About DeePlexiCon](#About-DeePlexiCon)
-- [What's included](#What\'s-included)
 - [Documentation](#Documentation) 
 - [Installation](#Installation) 
 - [Releases and Usage](#Releases-and-Usage) 
@@ -33,7 +32,7 @@ Please note that the software has been tested and validated with a set of 4x20bp
 
 Please see below further instructions about how to build barcoded direct RNA libraries.
 
-## What's included
+### What's included
 - Script to demultiplex direct RNA fast5 reads, barcoded using the strategy described above
 - Example fast5 data built using the 4 custom barcoded adaptors
 
